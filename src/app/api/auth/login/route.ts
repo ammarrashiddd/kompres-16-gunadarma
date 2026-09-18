@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { verifyPassword, signToken, isValidEmail } from "@/lib/auth";
 
 interface LoginBody {
@@ -27,27 +27,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Cari User di Database ─────────────────────────────
-    const users = await query<{
-      id: number;
-      nama: string;
-      email: string;
-      password: string;
-      created_at: string;
-    }>(
-      "SELECT id, nama, email, password, created_at FROM users WHERE email = $1 LIMIT 1",
-      [email.toLowerCase()]
-    );
+    // ── Cari User di Database (Prisma) ────────────────────
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
 
-    if (users.length === 0) {
-      // Pesan generik agar tidak mengekspos informasi user mana yang ada
+    if (!user) {
       return NextResponse.json(
         { success: false, message: "Email atau password salah." },
         { status: 401 }
       );
     }
-
-    const user = users[0];
 
     // ── Verifikasi Password ───────────────────────────────
     const isPasswordValid = await verifyPassword(password, user.password);
@@ -75,7 +65,7 @@ export async function POST(request: NextRequest) {
           id: user.id,
           nama: user.nama,
           email: user.email,
-          created_at: user.created_at,
+          created_at: user.createdAt,
         },
       },
       { status: 200 }

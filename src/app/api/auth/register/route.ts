@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { hashPassword, isValidEmail, isValidPassword } from "@/lib/auth";
 
 interface RegisterBody {
@@ -50,35 +50,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Cek Email Sudah Terdaftar ─────────────────────────
-    const existingUsers = await query<{ id: number }>(
-      "SELECT id FROM users WHERE email = $1 LIMIT 1",
-      [email.toLowerCase()]
-    );
+    // ── Cek Email Sudah Terdaftar (Prisma) ─────────────────
+    const existingUser = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+      select: { id: true },
+    });
 
-    if (existingUsers.length > 0) {
+    if (existingUser) {
       return NextResponse.json(
         { success: false, message: "Email sudah terdaftar. Silakan gunakan email lain." },
         { status: 409 }
       );
     }
 
-    // ── Hash Password & Simpan User ───────────────────────
+    // ── Hash Password & Simpan User (Prisma) ───────────────
     const hashedPassword = await hashPassword(password);
 
-    const newUsers = await query<{
-      id: number;
-      nama: string;
-      email: string;
-      created_at: string;
-    }>(
-      `INSERT INTO users (nama, email, password)
-       VALUES ($1, $2, $3)
-       RETURNING id, nama, email, created_at`,
-      [nama.trim(), email.toLowerCase(), hashedPassword]
-    );
-
-    const user = newUsers[0];
+    const user = await prisma.user.create({
+      data: {
+        nama: nama.trim(),
+        email: email.toLowerCase(),
+        password: hashedPassword,
+      },
+      select: {
+        id: true,
+        nama: true,
+        email: true,
+        createdAt: true,
+      },
+    });
 
     return NextResponse.json(
       {
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
           id: user.id,
           nama: user.nama,
           email: user.email,
-          created_at: user.created_at,
+          created_at: user.createdAt,
         },
       },
       { status: 201 }
