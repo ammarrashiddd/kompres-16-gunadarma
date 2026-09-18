@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import AuthForm from "@/components/AuthForm";
+import AuthForm from "@/components/auth/AuthForm";
 import InputField from "@/components/InputField";
 
 interface FieldErrors {
