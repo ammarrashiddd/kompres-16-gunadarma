@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Navbar from "@/components/navbar/page";
 
 export default function HomePage() {
   return (
@@ -8,44 +8,19 @@ export default function HomePage() {
       <div className="blob blob--2" aria-hidden="true" />
       <div className="blob blob--3" aria-hidden="true" />
 
-      <div className="landing-content">
-        {/* Brand */}
-        <div className="landing-brand">
-          <div className="auth-logo">
-            <svg
-              width="40"
-              height="40"
-              viewBox="0 0 32 32"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <rect width="32" height="32" rx="10" fill="url(#homeLogoGrad)" />
-              <path
-                d="M8 16C8 11.582 11.582 8 16 8C20.418 8 24 11.582 24 16"
-                stroke="white"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-              <circle cx="16" cy="20" r="4" fill="white" />
-              <defs>
-                <linearGradient id="homeLogoGrad" x1="0" y1="0" x2="32" y2="32">
-                  <stop offset="0%" stopColor="#6366f1" />
-                  <stop offset="100%" stopColor="#a855f7" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <span className="auth-brand-name landing-brand-name">AuthSecure</span>
-        </div>
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 md:px-12">
+        <Navbar />
+      </nav>
 
+      <div className="landing-content">
         {/* Hero */}
         <div className="landing-hero">
           <div className="landing-badge">🔐 Sistem Autentikasi JWT</div>
           <h1 className="landing-title">
             Keamanan Akun yang
             <br />
-            <span className="landing-title-gradient">Andal & Modern</span>
+            <span className="landing-title-gradient">Andal &amp; Modern</span>
           </h1>
           <p className="landing-description">
             Sistem autentikasi berbasis JSON Web Token dengan enkripsi bcrypt.
@@ -66,16 +41,6 @@ export default function HomePage() {
               <span className="feature-icon">🗄️</span>
               <span>Database PostgreSQL</span>
             </div>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="landing-cta">
-            <Link href="/register" id="cta-register" className="btn-primary btn-primary--lg">
-              Mulai Sekarang
-            </Link>
-            <Link href="/login" id="cta-login" className="btn-outline">
-              Sudah Punya Akun? Masuk
-            </Link>
           </div>
         </div>
       </div>
