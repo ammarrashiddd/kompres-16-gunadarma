@@ -1,4 +1,4 @@
-# AGENTS.md — SIGAP AI
+# AGENTS.md — GTek
 
 Panduan untuk AI coding agent (Claude Code, Cursor, Copilot, dll.) yang bekerja di repo ini. Baca file ini sebelum membuat perubahan apa pun. Referensi lengkap requirement produk ada di `PRD-SistemGempaAI.md` di root repo — file ini adalah turunan teknisnya untuk keperluan development sehari-hari.
 
