@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AuthSecure — Sistem Autentikasi JWT",
-  description: "Sistem autentikasi aman berbasis JWT dengan enkripsi bcrypt dan database PostgreSQL.",
+  title: "Gtek",
+  description: "Aplikasi pemantauan gempa Gtek - Universitas Gunadarma.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
