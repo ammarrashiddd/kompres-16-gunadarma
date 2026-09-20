@@ -12,6 +12,7 @@ model User {
   nama      String   @db.VarChar(100)
   email     String   @unique @db.VarChar(255)
   password  String   @db.VarChar(255)
+  avatar    String?  @db.Text
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   @@map("users")

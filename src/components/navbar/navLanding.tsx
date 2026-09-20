@@ -81,19 +81,12 @@ export default function NavLanding() {
 
   if (isLoggedIn) {
     return (
-      <div className="flex items-center gap-2 md:gap-3">
-        <Link
-          href="/dashboard"
-          className="rounded-full bg-[#202123] px-4 py-2 text-xs md:text-sm font-semibold text-white shadow-[0_6px_16px_rgba(32,33,35,0.12)] transition-all duration-150 hover:bg-[#38393a] active:scale-[0.98]"
-        >
-          Dashboard
-        </Link>
+      <div className="flex items-center">
         <UserMenu
           userName={userName || "Pengguna"}
           userEmail={userEmail}
           userImage={userImage}
           onLogout={handleLogout}
-          currentPath="landing"
         />
       </div>
     );

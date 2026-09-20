@@ -50,19 +50,12 @@ export default function NavDashboard() {
   }
 
   return (
-    <div className="flex items-center gap-2 md:gap-3">
-      <Link
-        href="/"
-        className="rounded-full border border-[#dedbd5] bg-white px-3.5 py-1.5 text-xs md:text-sm font-medium text-[#6f6d69] transition-all duration-150 hover:bg-[#f7f7f5] hover:text-[#202123]"
-      >
-        Beranda
-      </Link>
+    <div className="flex items-center">
       <UserMenu
         userName={userName}
         userEmail={userEmail}
         userImage={userImage}
         onLogout={handleLogout}
-        currentPath="dashboard"
       />
     </div>
   );
