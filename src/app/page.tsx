@@ -7,9 +7,36 @@ import {
   ShieldCheck,
 } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar/Navbar";
 
 export default function HomePage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const localToken = localStorage.getItem("auth_token");
+    if (localToken) {
+      setIsLoggedIn(true);
+      return;
+    }
+
+    const cookies = document.cookie;
+    if (
+      cookies.includes("auth_token=") ||
+      cookies.includes("authjs.session-token") ||
+      cookies.includes("next-auth.session-token")
+    ) {
+      setIsLoggedIn(true);
+    }
+
+    fetch("/api/auth/session")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user) setIsLoggedIn(true);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <main className="min-h-screen overflow-hidden bg-[#e9e7e5] px-3 py-3 text-[#202123] md:px-6 md:py-6 lg:px-8">
       <div className="mx-auto max-w-360 rounded-[30px] bg-[#f7f7f5] px-4 py-4 shadow-[0_24px_70px_rgba(48,43,38,0.12)] md:px-8 md:py-6">
@@ -32,10 +59,11 @@ export default function HomePage() {
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link
-                href="/register"
+                href={isLoggedIn ? "/dashboard" : "/register"}
                 className="inline-flex items-center gap-2 rounded-full bg-[#202123] px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-[#38393a] active:scale-[0.98]"
               >
-                Mulai dengan SIGAP <ArrowRight size={17} weight="bold" />
+                {isLoggedIn ? "Buka Dashboard" : "Mulai dengan SIGAP"}{" "}
+                <ArrowRight size={17} weight="bold" />
               </Link>
               <Link
                 href="/dashboard"
