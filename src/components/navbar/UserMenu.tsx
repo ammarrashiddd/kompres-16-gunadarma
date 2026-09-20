@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import { CaretDown, SignOut, Gear } from "@phosphor-icons/react";
-import EditProfileModal from "@/components/profile/EditProfileModal";
 
 interface UserMenuProps {
   userName: string;
@@ -17,10 +17,8 @@ export default function UserMenu({
   userEmail,
   userImage: initialUserImage,
   onLogout,
-  onProfileUpdated,
 }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [userName, setUserName] = useState(initialUserName);
   const [userAvatar, setUserAvatar] = useState(initialUserImage);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -42,14 +40,6 @@ export default function UserMenu({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  function handleProfileUpdated(updated: { nama: string; avatar?: string | null }) {
-    setUserName(updated.nama);
-    if (updated.avatar !== undefined) {
-      setUserAvatar(updated.avatar);
-    }
-    onProfileUpdated?.(updated);
-  }
 
   return (
     <>
@@ -96,18 +86,15 @@ export default function UserMenu({
               )}
             </div>
 
-            {/* Edit Profil Button */}
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false);
-                setIsEditModalOpen(true);
-              }}
+            {/* Edit Profil Link */}
+            <Link
+              href="/profile"
+              onClick={() => setIsOpen(false)}
               className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-semibold text-[#202123] rounded-xl hover:bg-[#f7f7f5] transition-colors duration-150 cursor-pointer"
             >
               <Gear size={16} weight="bold" className="text-[#a15d3c]" />
               Edit Profil
-            </button>
+            </Link>
 
             {/* Logout button */}
             <button
@@ -124,16 +111,6 @@ export default function UserMenu({
           </div>
         )}
       </div>
-
-      {/* Edit Profile Modal */}
-      <EditProfileModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        currentName={userName}
-        currentEmail={userEmail}
-        currentAvatar={userAvatar}
-        onProfileUpdated={handleProfileUpdated}
-      />
     </>
   );
 }

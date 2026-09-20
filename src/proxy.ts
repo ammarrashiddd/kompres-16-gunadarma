@@ -7,6 +7,7 @@ const PROTECTED_ROUTES = [
   "/community",
   "/risk-analysis",
   "/evacuation-assistant",
+  "/profile",
 ];
 
 // Route yang hanya bisa diakses jika BELUM login (redirect ke dashboard jika sudah)
