@@ -4,6 +4,10 @@ import { usePathname, useRouter } from "next/navigation";
 import NavDashboard from "./navDashboard";
 import NavLanding from "./navLanding";
 
+type NavbarProps = {
+  name?: string | null;
+};
+
 export default function Navbar() {
   const Router = useRouter();
   const pathname = usePathname();
@@ -16,7 +20,7 @@ export default function Navbar() {
         onClick={() => Router.push("/")}
         className="cursor-pointer select-none text-2xl font-semibold tracking-[-0.08em] text-[#202123] transition-opacity hover:opacity-70 md:text-[2.1rem]"
       >
-        <span className="text-[#c85b31]">●</span> SIGAP
+        <span className="text-[#c85b31]">●</span> GTek
       </h1>
 
       <div className="flex items-center gap-2 md:gap-3">

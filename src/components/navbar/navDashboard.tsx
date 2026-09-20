@@ -16,7 +16,7 @@ export default function NavDashboard() {
       <button
         type="button"
         onClick={handleLogout}
-        className="px-5 py-2 text-sm font-semibold text-white rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:opacity-90 hover:scale-105 transition-all duration-150 shadow-lg shadow-indigo-500/30"
+        className="rounded-full border border-[#e5e5ea] bg-white px-4 py-2 text-sm font-medium text-[#1d1d1f] transition-all duration-150 hover:bg-[#f7f7f8]"
       >
         Keluar
       </button>
