@@ -35,8 +35,10 @@ export default function LoginPage() {
         return;
       }
 
+      // Simpan token JWT di localStorage dan cookie (untuk middleware)
       localStorage.setItem("auth_token", data.token);
       localStorage.setItem("auth_user", JSON.stringify(data.data));
+      document.cookie = `auth_token=${data.token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
 
       setSuccess("Login berhasil! Mengarahkan...");
       setTimeout(() => router.push("/dashboard"), 1000);

@@ -8,6 +8,8 @@ export default function NavDashboard() {
   function handleLogout() {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("auth_user");
+    // Hapus cookie auth agar middleware redirect ke login
+    document.cookie = "auth_token=; path=/; max-age=0; SameSite=Lax";
     router.push("/login");
   }
 

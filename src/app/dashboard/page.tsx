@@ -5,7 +5,7 @@ import EvacuationSummary from "@/components/Ai/EvacuationSummary";
 import QuickActionsAndPlates from "@/components/Ai/QuickActionsAndPlates";
 import RiskAnalysisCard from "@/components/Ai/RiskAnalysisCard";
 import MapGempa from "@/components/mapGempa/page";
-import Navbar from "@/components/navbar/page";
+import Navbar from "@/components/navbar/Navbar";
 
 export default function Dashboard() {
   return (
