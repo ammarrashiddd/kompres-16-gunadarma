@@ -15,9 +15,13 @@ const AUTH_ROUTES = ["/login", "/register", "/auth"];
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Cek token JWT dari cookie atau header
+  // Cek token JWT dari cookie (custom JWT atau NextAuth Google session) atau header
   const token =
     request.cookies.get("auth_token")?.value ??
+    request.cookies.get("authjs.session-token")?.value ??
+    request.cookies.get("__Secure-authjs.session-token")?.value ??
+    request.cookies.get("next-auth.session-token")?.value ??
+    request.cookies.get("__Secure-next-auth.session-token")?.value ??
     request.headers.get("authorization")?.replace("Bearer ", "");
 
   const isLoggedIn = Boolean(token);

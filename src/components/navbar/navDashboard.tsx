@@ -1,15 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 export default function NavDashboard() {
   const router = useRouter();
 
-  function handleLogout() {
+  async function handleLogout() {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("auth_user");
     // Hapus cookie auth agar middleware redirect ke login
     document.cookie = "auth_token=; path=/; max-age=0; SameSite=Lax";
+    try {
+      await signOut({ redirect: false });
+    } catch {
+      // ignore
+    }
     router.push("/login");
   }
 
