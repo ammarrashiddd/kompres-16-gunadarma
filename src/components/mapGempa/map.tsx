@@ -55,34 +55,44 @@ export default function Map() {
 
     async function fetchData() {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const rawBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://earthquake.usgs.gov";
+        const baseUrl = rawBaseUrl.endsWith("/earthquakes")
+          ? rawBaseUrl
+          : `${rawBaseUrl}/earthquakes`;
 
         const eqRes = await fetch(
           `${baseUrl}/feed/v1.0/summary/2.5_day.geojson`,
         );
-        const eqData = await eqRes.json();
 
-        const filteredEarthquakes = (eqData.features || []).filter(
-          (eq: EarthquakeFeature) => {
-            const [longitude, latitude] = eq.geometry.coordinates;
-            return (
-              latitude >= -11.0 &&
-              latitude <= 6.0 &&
-              longitude >= 94.0 &&
-              longitude <= 141.0
-            );
-          },
-        );
+        if (eqRes.ok) {
+          const eqData = await eqRes.json();
+          const filteredEarthquakes = (eqData.features || []).filter(
+            (eq: EarthquakeFeature) => {
+              const [longitude, latitude] = eq.geometry.coordinates;
+              return (
+                latitude >= -11.0 &&
+                latitude <= 6.0 &&
+                longitude >= 94.0 &&
+                longitude <= 141.0
+              );
+            },
+          );
+          setEarthquakes(filteredEarthquakes);
+        }
 
-        setEarthquakes(filteredEarthquakes);
-
-        const platesRes = await fetch(
-          "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_plates.json",
-        );
-        const platesGeoJson = await platesRes.json();
-        setPlatesData(platesGeoJson);
+        try {
+          const platesRes = await fetch(
+            "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_plates.json",
+          );
+          if (platesRes.ok) {
+            const platesGeoJson = await platesRes.json();
+            setPlatesData(platesGeoJson);
+          }
+        } catch (plateErr) {
+          console.warn("Gagal memuat data lempeng tektonik:", plateErr);
+        }
       } catch (error) {
-        console.error("Gagal memuat data peta:", error);
+        console.error("Gagal memuat data gempa:", error);
       } finally {
         setLoading(false);
       }

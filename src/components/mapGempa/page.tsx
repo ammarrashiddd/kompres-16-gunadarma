@@ -19,12 +19,18 @@ export default function MapGempa() {
   useEffect(() => {
     async function fetchEarthquakes() {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const rawBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://earthquake.usgs.gov";
+        const baseUrl = rawBaseUrl.endsWith("/earthquakes")
+          ? rawBaseUrl
+          : `${rawBaseUrl}/earthquakes`;
+
         const eqRes = await fetch(
           `${baseUrl}/feed/v1.0/summary/2.5_day.geojson`,
         );
-        const eqData = await eqRes.json();
 
+        if (!eqRes.ok) return;
+
+        const eqData = await eqRes.json();
         const filtered = (eqData.features || []).filter((eq: any) => {
           const [longitude, latitude] = eq.geometry.coordinates;
           return (
@@ -37,7 +43,7 @@ export default function MapGempa() {
 
         setEarthquakes(filtered);
       } catch (err) {
-        console.error(err);
+        console.error("Gagal memuat gempa:", err);
       }
     }
 
