@@ -4,11 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import UserMenu from "./UserMenu";
 
 export default function NavLanding() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userImage, setUserImage] = useState<string | null>(null);
 
   useEffect(() => {
     // 1. Cek token lokal (custom JWT)
@@ -20,6 +23,8 @@ export default function NavLanding() {
         try {
           const u = JSON.parse(localUser);
           setUserName(u.nama || u.name);
+          setUserEmail(u.email || null);
+          setUserImage(u.image || null);
         } catch {}
       }
       return;
@@ -43,6 +48,8 @@ export default function NavLanding() {
           setIsLoggedIn(true);
           const name = data.user.name || data.user.email?.split("@")[0];
           setUserName(name);
+          setUserEmail(data.user.email || null);
+          setUserImage(data.user.image || null);
           try {
             localStorage.setItem(
               "auth_user",
@@ -67,30 +74,27 @@ export default function NavLanding() {
     } catch {}
     setIsLoggedIn(false);
     setUserName(null);
+    setUserEmail(null);
+    setUserImage(null);
     router.refresh();
   }
 
   if (isLoggedIn) {
     return (
       <div className="flex items-center gap-2 md:gap-3">
-        {userName && (
-          <span className="hidden sm:inline-block text-xs font-semibold text-[#6f6d69]">
-            Halo, {userName}
-          </span>
-        )}
         <Link
           href="/dashboard"
-          className="rounded-full bg-[#202123] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(32,33,35,0.12)] transition-all duration-150 hover:bg-[#38393a] active:scale-[0.98]"
+          className="rounded-full bg-[#202123] px-4 py-2 text-xs md:text-sm font-semibold text-white shadow-[0_6px_16px_rgba(32,33,35,0.12)] transition-all duration-150 hover:bg-[#38393a] active:scale-[0.98]"
         >
           Dashboard
         </Link>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="rounded-full border border-[#e5e3df] bg-white px-4 py-2 text-sm font-medium text-[#6f6d69] transition-all duration-150 hover:bg-[#f5f5f7] hover:text-[#202123] cursor-pointer"
-        >
-          Keluar
-        </button>
+        <UserMenu
+          userName={userName || "Pengguna"}
+          userEmail={userEmail}
+          userImage={userImage}
+          onLogout={handleLogout}
+          currentPath="landing"
+        />
       </div>
     );
   }

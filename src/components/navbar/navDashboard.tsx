@@ -1,10 +1,40 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import Link from "next/link";
+import UserMenu from "./UserMenu";
 
 export default function NavDashboard() {
   const router = useRouter();
+  const [userName, setUserName] = useState<string>("Pengguna");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userImage, setUserImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const localUser = localStorage.getItem("auth_user");
+    if (localUser) {
+      try {
+        const u = JSON.parse(localUser);
+        if (u.nama || u.name) setUserName(u.nama || u.name);
+        if (u.email) setUserEmail(u.email);
+        if (u.image) setUserImage(u.image);
+      } catch {}
+    }
+
+    fetch("/api/auth/session")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user) {
+          const name = data.user.name || data.user.email?.split("@")[0];
+          setUserName(name);
+          setUserEmail(data.user.email || null);
+          setUserImage(data.user.image || null);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   async function handleLogout() {
     localStorage.removeItem("auth_token");
@@ -20,14 +50,21 @@ export default function NavDashboard() {
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <button
-        type="button"
-        onClick={handleLogout}
-        className="rounded-full border border-[#e5e5ea] bg-white px-4 py-2 text-sm font-medium text-[#1d1d1f] transition-all duration-150 hover:bg-[#f7f7f8]"
+    <div className="flex items-center gap-2 md:gap-3">
+      <Link
+        href="/"
+        className="rounded-full border border-[#dedbd5] bg-white px-3.5 py-1.5 text-xs md:text-sm font-medium text-[#6f6d69] transition-all duration-150 hover:bg-[#f7f7f5] hover:text-[#202123]"
       >
-        Keluar
-      </button>
+        Beranda
+      </Link>
+      <UserMenu
+        userName={userName}
+        userEmail={userEmail}
+        userImage={userImage}
+        onLogout={handleLogout}
+        currentPath="dashboard"
+      />
     </div>
   );
 }
+
