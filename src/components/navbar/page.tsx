@@ -8,32 +8,24 @@ type NavbarProps = {
   name?: string | null;
 };
 
-export default function Navbar({ name }: NavbarProps) {
+export default function Navbar() {
   const Router = useRouter();
   const pathname = usePathname();
 
   const isDashboard = pathname.startsWith("/dashboard");
 
   return (
-    <main className="flex items-center justify-between w-full">
+    <header className="flex w-full items-center justify-between border-b border-[#e5e3df] pb-4">
       <h1
         onClick={() => Router.push("/")}
-        className="text-primary text-2xl md:text-4xl font-black tracking-tighter cursor-pointer select-none"
+        className="cursor-pointer select-none text-2xl font-semibold tracking-[-0.08em] text-[#202123] transition-opacity hover:opacity-70 md:text-[2.1rem]"
       >
-        GTek
+        <span className="text-[#c85b31]">●</span> GTek
       </h1>
 
-      <div className="flex items-center gap-1.5 md:gap-4">
-        {isDashboard ? (
-          <>
-            <NavDashboard />
-          </>
-        ) : (
-          <>
-            <NavLanding />
-          </>
-        )}
+      <div className="flex items-center gap-2 md:gap-3">
+        {isDashboard ? <NavDashboard /> : <NavLanding />}
       </div>
-    </main>
+    </header>
   );
 }

@@ -2,16 +2,16 @@ import Link from "next/link";
 
 export default function NavLanding() {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
       <Link
         href="/login"
-        className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white transition-colors duration-150"
+        className="rounded-full px-4 py-2 text-sm font-medium text-[#6f6d69] transition-colors duration-150 hover:text-[#202123]"
       >
         Masuk
       </Link>
       <Link
         href="/register"
-        className="px-5 py-2 text-sm font-semibold text-white rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:opacity-90 hover:scale-105 transition-all duration-150 shadow-lg shadow-indigo-500/30"
+        className="rounded-full bg-[#202123] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(32,33,35,0.12)] transition-all duration-150 hover:bg-[#38393a] active:scale-[0.98]"
       >
         Daftar
       </Link>

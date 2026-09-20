@@ -11,15 +11,19 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { renderToString } from "react-dom/server";
+import { MapPinLineIcon } from "@phosphor-icons/react";
 
-// Fix icon marker default Leaflet
-const customIcon = new L.Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
+const customIcon = L.divIcon({
+  className: "custom-phosphor-marker",
+  html: renderToString(
+    <div className="flex items-center justify-center drop-shadow-md transition-transform hover:scale-110">
+      <MapPinLineIcon size={28} color="#d76767" weight="fill" />
+    </div>,
+  ),
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -12],
 });
 
 const INDONESIA_BOUNDS: L.LatLngBoundsExpression = [
@@ -44,10 +48,10 @@ export default function Map() {
   const [earthquakes, setEarthquakes] = useState<EarthquakeFeature[]>([]);
   const [platesData, setPlatesData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isMounted, setIsMounted] = useState(false); // Fix SSR/Hydration Issue
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true); // Pastikan sudah di client
+    setIsMounted(true);
 
     async function fetchData() {
       try {
@@ -96,7 +100,7 @@ export default function Map() {
 
     layer.bindPopup(`
       <div style="padding: 4px; font-family: sans-serif;">
-        <span style="font-size: 10px; font-weight: bold; color: #dc3545; text-transform: uppercase;">Kode Lempeng</span>
+        <span style="font-size: 10px; font-weight: bold; color: #d76767; text-transform: uppercase;">Lempeng Tektonik</span>
         <h4 style="margin: 2px 0 6px 0; font-size: 14px; color: #111827; font-weight: bold;">
           ${plateCode}
         </h4>
@@ -104,24 +108,21 @@ export default function Map() {
     `);
   };
 
-  // Jangan render apa-apa jika belum dipastikan ter-mount di browser client
   if (!isMounted || loading) {
     return (
-      <div className="flex h-125 w-full items-center justify-center rounded-xl bg-gray-100">
-        <p className="text-gray-500 font-medium">
-          Memuat data gempa & patahan lempeng Indonesia...
-        </p>
+      <div className="flex h-[420px] w-full items-center justify-center rounded-[20px] bg-[#f9f9f7] text-sm font-medium text-[#6e6e73]">
+        Memuat data gempa & patahan lempeng Indonesia...
       </div>
     );
   }
 
   return (
     <div
-      style={{ height: "500px", width: "100%" }}
-      className="rounded-xl overflow-hidden border border-gray-200 shadow-sm"
+      style={{ height: "420px", width: "100%" }}
+      className="overflow-hidden rounded-[20px] border border-[#dedbd5] bg-[#f9f9f7]"
     >
       <MapContainer
-        key="indonesia-map-container" // Mencegah reutilisasi ID container pada Leaflet
+        key="indonesia-map-container"
         center={[-2.5489, 118.0149]}
         zoom={5}
         minZoom={4}
@@ -150,10 +151,9 @@ export default function Map() {
               <GeoJSON
                 data={platesData}
                 style={{
-                  color: "#ff3333",
-                  weight: 4,
+                  color: "#d76767",
+                  weight: 2,
                   opacity: 0.8,
-                  fill: false,
                 }}
                 onEachFeature={onEachPlate}
               />
@@ -171,16 +171,16 @@ export default function Map() {
             >
               <Popup>
                 <div className="p-1">
-                  <h4 className="font-bold text-sm text-gray-900">
+                  <h4 className="text-sm font-bold text-[#111827]">
                     {eq.properties.title}
                   </h4>
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="mt-1 text-xs text-[#4b5563]">
                     <strong>Magnitudo:</strong> M {eq.properties.mag}
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-[#4b5563]">
                     <strong>Kedalaman:</strong> {depth} km
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="mt-1 text-[11px] text-[#6b7280]">
                     {new Date(eq.properties.time).toLocaleString("id-ID")}
                   </p>
                 </div>

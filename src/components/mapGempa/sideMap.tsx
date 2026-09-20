@@ -9,7 +9,7 @@ interface EarthquakeFeature {
     time: number;
   };
   geometry: {
-    coordinates: [number, number, number]; // [longitude, latitude, depth]
+    coordinates: [number, number, number];
   };
 }
 
@@ -23,19 +23,17 @@ export default function SideMap({
   onSelectEarthquake,
 }: SideMapProps) {
   return (
-    <aside className="flex h-125 w-full flex-col rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="border-b border-gray-100 bg-gray-50/80 px-4 py-3">
-        <h3 className="font-bold text-gray-900 text-sm flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+    <aside className="flex h-[420px] w-full flex-col overflow-hidden rounded-[24px] border border-[#e3e1dc] bg-[#fbfbf9] shadow-[0_10px_25px_rgba(48,43,38,0.04)]">
+      <div className="border-b border-[#ebe9e5] bg-[#f2f1ee] px-4 py-3.5">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-[#202123]">
+          <span className="h-2.5 w-2.5 rounded-full bg-[#d76767]" />
           Gempa Terkini ({earthquakes.length})
         </h3>
       </div>
 
-      {/* List Gempa */}
-      <div className="flex-1 overflow-y-auto divide-y divide-gray-100 p-2">
+      <div className="flex-1 space-y-2 overflow-y-auto p-2">
         {earthquakes.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-center text-xs text-gray-400 p-4">
+          <div className="flex h-full items-center justify-center p-4 text-center text-xs text-[#7a7269]">
             Tidak ada data gempa terbaru.
           </div>
         ) : (
@@ -47,19 +45,19 @@ export default function SideMap({
               <div
                 key={eq.id}
                 onClick={() => onSelectEarthquake?.(latitude, longitude)}
-                className="group p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                className="cursor-pointer rounded-[16px] border border-[#eceae6] bg-white p-3 transition-all hover:-translate-y-0.5 hover:border-[#ded5cd] hover:bg-[#fdfbf9]"
               >
                 <div className="flex items-start justify-between gap-2">
                   <span
-                    className={`inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-bold ${
+                    className={`inline-flex items-center justify-center rounded-full px-2 py-1 text-[10px] font-bold ${
                       isHighMag
-                        ? "bg-red-100 text-red-700"
-                        : "bg-amber-100 text-amber-700"
+                        ? "bg-[#f9d9d5] text-[#8c2b27]"
+                        : "bg-[#f6ebd8] text-[#8b5a00]"
                     }`}
                   >
                     M {eq.properties.mag.toFixed(1)}
                   </span>
-                  <span className="text-[10px] text-gray-400">
+                  <span className="text-[10px] text-[#8a8179]">
                     {new Date(eq.properties.time).toLocaleTimeString("id-ID", {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -67,12 +65,12 @@ export default function SideMap({
                   </span>
                 </div>
 
-                <p className="mt-1.5 text-xs font-medium text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                <p className="mt-2 text-xs font-medium leading-5 text-[#1f1f1f]">
                   {eq.properties.place || eq.properties.title}
                 </p>
 
-                <div className="mt-2 flex items-center justify-between text-[11px] text-gray-500">
-                  <span>Kedalaman: {depth} km</span>
+                <div className="mt-2 text-[11px] text-[#7a7269]">
+                  Kedalaman: {depth} km
                 </div>
               </div>
             );
