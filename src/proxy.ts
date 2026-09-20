@@ -12,7 +12,7 @@ const PROTECTED_ROUTES = [
 // Route yang hanya bisa diakses jika BELUM login (redirect ke dashboard jika sudah)
 const AUTH_ROUTES = ["/login", "/register", "/auth"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Cek token JWT dari cookie atau header
