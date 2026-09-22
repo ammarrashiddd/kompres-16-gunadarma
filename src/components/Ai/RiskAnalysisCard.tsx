@@ -1,93 +1,116 @@
 "use client";
 
-import { ShieldWarning, MapPin, TrendUp } from "@phosphor-icons/react";
+import { useState } from "react";
+import {
+  ShieldWarning,
+  Robot,
+  MapPin,
+  Spinner,
+  ArrowClockwise,
+} from "@phosphor-icons/react";
 
-interface RiskAnalysisCardProps {
-  locationName?: string;
-  riskScore?: number;
-  faultDistanceKm?: number;
-}
+export default function RiskAnalysisCard() {
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<any>(null);
 
-export default function RiskAnalysisCard({
-  locationName = "Jakarta & Sejakatnya",
-  riskScore = 65,
-  faultDistanceKm = 42,
-}: RiskAnalysisCardProps) {
-  const getRiskBadge = (score: number) => {
-    if (score >= 75)
-      return { label: "Tinggi", tone: "bg-[#fce7e7] text-[#a83a3a]" };
-    if (score >= 45)
-      return { label: "Sedang", tone: "bg-[#fff4df] text-[#a66b00]" };
-    return { label: "Rendah", tone: "bg-[#edf7ee] text-[#2f6e3a]" };
+  const handleAnalyze = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/risk-analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lat: -6.2383,
+          lon: 106.9756,
+          locationName: "Kota Bekasi, Jawa Barat",
+        }),
+      });
+
+      const result = await res.json();
+      if (result.success) {
+        setData(result);
+      }
+    } catch (err) {
+      console.error("Gagal mengambil data risiko:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const badge = getRiskBadge(riskScore);
-
   return (
-    <div className="rounded-[24px] border border-[#e3e1dc] bg-white p-5 shadow-[0_10px_24px_rgba(48,43,38,0.04)] md:p-6">
-      <div className="mb-4 flex items-center justify-between border-b border-[#f2f2f4] pb-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[#fce7e7] text-[#a83a3a]">
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-4">
+      {/* Header & Tombol Cek */}
+      <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-lg bg-red-50 text-red-600">
             <ShieldWarning size={20} weight="fill" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-[#1d1d1f]">
-              Analisis Risiko Lokasi
+            <h3 className="font-bold text-gray-900 text-sm">
+              Analisis Risiko ML & AI
             </h3>
-            <p className="mt-1 flex items-center gap-1 text-[11px] text-[#7d7d82]">
-              <MapPin size={12} /> {locationName}
+            <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+              <MapPin size={12} /> Kota Bekasi, Jawa Barat
             </p>
           </div>
         </div>
-        <span
-          className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${badge.tone}`}
+
+        <button
+          onClick={handleAnalyze}
+          disabled={loading}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-900 text-white text-xs font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
         >
-          Risiko {badge.label}
-        </span>
+          {loading ? (
+            <Spinner size={14} className="animate-spin" />
+          ) : (
+            <ArrowClockwise size={14} />
+          )}
+          {data ? "Analisis Ulang" : "Cek Kerentanan"}
+        </button>
       </div>
 
-      <div className="mb-4">
-        <div className="mb-2 flex items-end justify-between">
-          <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-[#8a8a8f]">
-            Skor Kerawanan
-          </span>
-          <span className="text-[clamp(1.8rem,2vw,2.3rem)] font-semibold tracking-[-0.06em] text-[#1d1d1f]">
-            {riskScore}
-            <span className="text-xs font-medium text-[#8a8a8f]">/100</span>
-          </span>
-        </div>
-        <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#f1f1f4]">
-          <div
-            className={`h-full rounded-full ${
-              riskScore >= 75
-                ? "bg-[#d66666]"
-                : riskScore >= 45
-                  ? "bg-[#d9a84f]"
-                  : "bg-[#61b36d]"
-            }`}
-            style={{ width: `${riskScore}%` }}
-          />
-        </div>
-      </div>
+      {/* Konten Hasil Analisis */}
+      {data && (
+        <div className="space-y-4">
+          {/* Section 1: Skor dari Machine Learning */}
+          <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-100">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs font-medium text-gray-600">
+                Skor Kerentanan ML
+              </span>
+              <span className="text-sm font-bold text-red-600">
+                {data.mlResult.vulnerabilityScore} / 100 (
+                {data.mlResult.category})
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+              <div
+                className="bg-red-500 h-full transition-all duration-500"
+                style={{ width: `${data.mlResult.vulnerabilityScore}%` }}
+              />
+            </div>
+            <div className="mt-2.5 grid grid-cols-2 gap-2 text-[11px] text-gray-500">
+              <div>
+                • Frekuensi: {data.mlResult.features.freqPerYear} kali/thn
+              </div>
+              <div>
+                • Gempa &ge; M 5.0: {data.mlResult.features.m5Count} kali
+              </div>
+            </div>
+          </div>
 
-      <div className="grid grid-cols-2 gap-3 rounded-[20px] border border-[#f1f1f4] bg-[#f9f9fb] p-3">
-        <div>
-          <span className="block text-[10px] uppercase tracking-[0.12em] text-[#8a8a8f]">
-            Jarak Patahan
-          </span>
-          <span className="mt-1 block text-sm font-medium text-[#1d1d1f]">
-            ± {faultDistanceKm} km
-          </span>
+          {/* Section 2: Saran & Penjelasan dari Gemini AI */}
+          <div className="rounded-lg border border-indigo-100 bg-indigo-50/40 p-3.5">
+            <div className="flex items-center gap-1.5 text-indigo-900 font-bold text-xs mb-2">
+              <Robot size={16} weight="fill" className="text-indigo-600" />
+              <span>Rekomendasi & Analisis Gemini AI</span>
+            </div>
+            <div className="text-xs text-gray-700 leading-relaxed whitespace-pre-line">
+              {data.aiAdvice}
+            </div>
+          </div>
         </div>
-        <div>
-          <span className="block text-[10px] uppercase tracking-[0.12em] text-[#8a8a8f]">
-            Frekuensi Gempa
-          </span>
-          <span className="mt-1 flex items-center gap-1 text-sm font-medium text-[#1d1d1f]">
-            <TrendUp size={14} className="text-[#b1862d]" /> 14 kejadian
-          </span>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

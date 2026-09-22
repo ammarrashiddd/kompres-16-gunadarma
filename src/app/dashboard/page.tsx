@@ -32,15 +32,8 @@ export default function Dashboard() {
 
         <div className="space-y-6">
           <MapGempa />
-          <DashboardStats
-            totalEarthquakes={14}
-            maxMagnitude={6}
-            highRiskCount={6}
-          />
-          <QuickActionsAndPlates />
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.3fr_0.9fr]">
+          <div>
             <RiskAnalysisCard />
-            <EvacuationSummary />
           </div>
         </div>
       </div>
