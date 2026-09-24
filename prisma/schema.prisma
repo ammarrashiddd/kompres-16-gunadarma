@@ -8,12 +8,32 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  nama      String   @db.VarChar(100)
-  email     String   @unique @db.VarChar(255)
-  password  String   @db.VarChar(255)
-  avatar    String?  @db.Text
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id             Int             @id @default(autoincrement())
+  nama           String          @db.VarChar(100)
+  email          String          @unique @db.VarChar(255)
+  password       String          @db.VarChar(255)
+  avatar         String?         @db.Text
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  communityPosts CommunityPost[]
 
   @@map("users")
+}
+
+model CommunityPost {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @map("user_id")
+  title         String   @db.VarChar(200)
+  description   String   @db.Text
+  locationName  String   @map("location_name") @db.VarChar(150)
+  latitude      Float?
+  longitude     Float?
+  damageLevel   String   @default("RINGAN") @map("damage_level") @db.VarChar(20)
+  imageUrl      String?  @map("image_url") @db.Text
+  verifiedCount Int      @default(0) @map("verified_count")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("community_posts")
 }
