@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import AiGemini from "@/components/Ai/AiGemini";
 import RiskAnalysisCard from "@/components/Ai/RiskAnalysisCard";
@@ -11,12 +12,6 @@ import type {
   SavedRiskAnalysisResponse,
 } from "@/types";
 
-const analysisLocation = {
-  lat: -6.2383,
-  lon: 106.9756,
-  locationName: "Kota Bekasi, Jawa Barat",
-};
-
 export default function RiskAnalysisSection() {
   const [riskData, setRiskData] = useState<RiskAnalysisResult | null>(null);
   const [advice, setAdvice] = useState<GeminiStructuredAdvice | null>(null);
@@ -24,6 +19,8 @@ export default function RiskAnalysisSection() {
   const [geminiLoading, setGeminiLoading] = useState(false);
   const [riskError, setRiskError] = useState<string | null>(null);
   const [geminiError, setGeminiError] = useState<string | null>(null);
+  const [cityName, setCityName] = useState<string | null>(null);
+  const [showCityPrompt, setShowCityPrompt] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,6 +30,17 @@ export default function RiskAnalysisSection() {
       setGeminiLoading(true);
 
       try {
+        const profileResponse = await fetch("/api/user/profile");
+        if (!profileResponse.ok) throw new Error("Gagal memuat profil.");
+        const profileResult = await profileResponse.json();
+        const savedCity = profileResult.data?.cityName ?? null;
+        if (cancelled) return;
+        setCityName(savedCity);
+
+        if (!savedCity) {
+          return;
+        }
+
         const response = await fetch("/api/risk-analysis");
         if (response.status === 404) return;
 
@@ -73,6 +81,16 @@ export default function RiskAnalysisSection() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!showCityPrompt) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setShowCityPrompt(false);
+    }, 2000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [showCityPrompt]);
+
   const handleAnalyze = async () => {
     setRiskLoading(true);
     setGeminiLoading(true);
@@ -82,10 +100,14 @@ export default function RiskAnalysisSection() {
     setAdvice(null);
 
     try {
+      if (!cityName) {
+        setShowCityPrompt(true);
+        return;
+      }
+
       const riskResponse = await fetch("/api/risk-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(analysisLocation),
       });
       const riskResult = (await riskResponse.json()) as
         | RiskAnalysisResponse
@@ -137,13 +159,34 @@ export default function RiskAnalysisSection() {
 
   return (
     <div className="space-y-4">
-      <RiskAnalysisCard
-        data={riskData}
-        loading={isLoading}
-        error={riskError}
-        onAnalyze={handleAnalyze}
-      />
-      <AiGemini advice={advice} loading={isLoading} error={geminiError} />
+      <div>
+        <RiskAnalysisCard
+          data={riskData}
+          locationName={cityName}
+          loading={isLoading}
+          error={riskError}
+          onAnalyze={handleAnalyze}
+        />
+        <AiGemini advice={advice} loading={isLoading} error={geminiError} />
+      </div>
+      <div>
+        {showCityPrompt && (
+          <div className="fixed right-4 top-4 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 shadow-lg">
+            <p className="text-sm font-semibold text-amber-950">
+              Pilih kota di profile terlebih dahulu
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-amber-800">
+              Lokasi ini diperlukan untuk menjalankan analisis risiko.
+            </p>
+            <Link
+              href="/profile"
+              className="mt-2 inline-block text-xs font-semibold text-amber-950 underline underline-offset-2 hover:text-amber-700"
+            >
+              Buka Profile
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

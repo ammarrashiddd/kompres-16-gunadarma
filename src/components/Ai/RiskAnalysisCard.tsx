@@ -10,6 +10,7 @@ import type { RiskAnalysisResult } from "@/types";
 
 interface RiskAnalysisCardProps {
   data: RiskAnalysisResult | null;
+  locationName: string | null;
   loading: boolean;
   error: string | null;
   onAnalyze: () => void;
@@ -17,6 +18,7 @@ interface RiskAnalysisCardProps {
 
 export default function RiskAnalysisCard({
   data,
+  locationName,
   loading,
   error,
   onAnalyze,
@@ -33,7 +35,7 @@ export default function RiskAnalysisCard({
               Analisis Risiko ML
             </h3>
             <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
-              <MapPin size={12} /> Kota Bekasi, Jawa Barat
+              <MapPin size={12} /> {locationName ?? "Kota belum dipilih"}
             </p>
           </div>
         </div>

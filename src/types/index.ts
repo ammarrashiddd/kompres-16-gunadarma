@@ -36,6 +36,12 @@ export interface RiskAnalysisResponse {
   mlResult: RiskAnalysisResult;
 }
 
+export interface KotaProfile {
+  cityName: string | null;
+  cityLatitude: number | null;
+  cityLongitude: number | null;
+}
+
 export interface SavedRiskAnalysisResponse {
   success: true;
   analysisId: number;

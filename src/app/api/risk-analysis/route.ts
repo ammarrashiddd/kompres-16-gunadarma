@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     }
 
     const analysis = await prisma.riskAnalysis.findFirst({
-      where: { userId: user.id },
+      where: { userId: user.id, locationName: user.cityName },
       orderBy: { createdAt: "desc" },
       include: { geminiAdvice: true },
     });
@@ -114,29 +114,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { lat, lon, locationName } = await request.json();
-
     if (
-      typeof lat !== "number" ||
-      typeof lon !== "number" ||
-      lat < -90 ||
-      lat > 90 ||
-      lon < -180 ||
-      lon > 180
+      user.cityName === null ||
+      user.cityLatitude === null ||
+      user.cityLongitude === null
     ) {
       return NextResponse.json(
-        { error: "Koordinat lat dan lon valid wajib diisi" },
+        {
+          error: "Pilih kota di halaman profile sebelum menjalankan analisis.",
+          code: "CITY_REQUIRED",
+        },
         { status: 400 },
       );
     }
 
-    const mlResult = await runMachineLearningModel(lat, lon);
+    const mlResult = await runMachineLearningModel(
+      user.cityLatitude,
+      user.cityLongitude,
+    );
     const analysis = await prisma.riskAnalysis.create({
       data: {
         userId: user.id,
-        locationName: typeof locationName === "string" ? locationName : null,
-        latitude: lat,
-        longitude: lon,
+        locationName: user.cityName,
+        latitude: user.cityLatitude,
+        longitude: user.cityLongitude,
         vulnerabilityScore: mlResult.vulnerabilityScore,
         category: toRiskCategory(mlResult.category),
         freqPerYear: mlResult.features.freqPerYear,
@@ -152,7 +153,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       analysisId: analysis.id,
-      location: locationName,
+      location: user.cityName,
       mlResult,
     });
   } catch (error) {

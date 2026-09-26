@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect, useState, useRef, type ChangeEvent, type FormEvent } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/navbar/Navbar";
+import type { KotaPilihan } from "@/lib/namaDaerah/kotaPilihan";
 import {
   ArrowLeft,
   Camera,
@@ -11,6 +18,7 @@ import {
   Eye,
   EyeSlash,
   Lock,
+  MagnifyingGlass,
   ShieldCheck,
   Trash,
   User,
@@ -24,6 +32,10 @@ export default function ProfilePage() {
   const [email, setEmail] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [isOAuth, setIsOAuth] = useState(false);
+  const [cityName, setCityName] = useState("");
+  const [cityQuery, setCityQuery] = useState("");
+  const [kotaPilihan, setKotaPilihan] = useState<readonly KotaPilihan[]>([]);
+  const [showCityOptions, setShowCityOptions] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -38,6 +50,22 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    async function loadKotaPilihan() {
+      try {
+        const res = await fetch("/api/cities");
+        if (!res.ok) throw new Error("Gagal memuat daftar kota.");
+        const data = await res.json();
+        setKotaPilihan(data.data || []);
+      } catch (err) {
+        console.error(err);
+        setError("Gagal memuat daftar kota.");
+      }
+    }
+
+    loadKotaPilihan();
+  }, []);
 
   useEffect(() => {
     async function loadProfile() {
@@ -57,6 +85,8 @@ export default function ProfilePage() {
           setEmail(data.data.email || "");
           setAvatar(data.data.avatar || null);
           setIsOAuth(Boolean(data.data.isOAuth));
+          setCityName(data.data.cityName || "");
+          setCityQuery(data.data.cityName || "");
         }
       } catch (err) {
         console.error(err);
@@ -113,6 +143,7 @@ export default function ProfilePage() {
       const payload: Record<string, any> = {
         nama: nama.trim(),
         avatar: avatar,
+        cityName: cityName || null,
       };
 
       if (newPassword) {
@@ -145,7 +176,8 @@ export default function ProfilePage() {
             ...existing,
             nama: data.data.nama,
             avatar: data.data.avatar,
-          })
+            cityName: data.data.cityName,
+          }),
         );
       } catch {}
 
@@ -180,7 +212,11 @@ export default function ProfilePage() {
               onClick={() => router.push("/dashboard")}
               className="inline-flex items-center gap-2 text-xs font-semibold text-[#6f6d69] hover:text-[#202123] transition-colors mb-2 cursor-pointer group"
             >
-              <ArrowLeft size={16} weight="bold" className="group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft
+                size={16}
+                weight="bold"
+                className="group-hover:-translate-x-1 transition-transform"
+              />
               Kembali ke Dashboard
             </button>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#202123]">
@@ -197,7 +233,10 @@ export default function ProfilePage() {
             Memuat profil akun...
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start"
+          >
             {/* Left Card: Avatar & User Summary */}
             <div className="rounded-[24px] border border-[#dedbd5] bg-white p-6 shadow-sm flex flex-col items-center text-center">
               {/* Avatar Frame */}
@@ -312,6 +351,76 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-1.5">
+                  <label
+                    htmlFor="cityName"
+                    className="text-xs font-semibold uppercase tracking-wide text-[#6f6d69]"
+                  >
+                    Kota
+                  </label>
+                  <div className="relative">
+                    <MagnifyingGlass
+                      size={18}
+                      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#777572]"
+                    />
+                    <input
+                      id="cityName"
+                      type="search"
+                      value={cityQuery}
+                      onFocus={() => setShowCityOptions(true)}
+                      onChange={(event) => {
+                        setCityQuery(event.target.value);
+                        setCityName("");
+                        setShowCityOptions(true);
+                      }}
+                      placeholder="Cari nama kota..."
+                      autoComplete="off"
+                      className="w-full rounded-xl border border-[#dedbd5] bg-[#f7f7f5] py-3 pl-11 pr-4 text-sm text-[#202123] outline-none transition-all focus:border-[#202123] focus:bg-white"
+                    />
+                    {showCityOptions && (
+                      <div className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-xl border border-[#dedbd5] bg-white p-1 shadow-lg">
+                        {kotaPilihan
+                          .filter((kota) =>
+                            kota.name
+                              .toLowerCase()
+                              .includes(cityQuery.toLowerCase()),
+                          )
+                          .map((kota) => (
+                            <button
+                              key={kota.id}
+                              type="button"
+                              onClick={() => {
+                                setCityName(kota.name);
+                                setCityQuery(kota.name);
+                                setShowCityOptions(false);
+                              }}
+                              className="block w-full rounded-lg px-3 py-2 text-left text-sm text-[#202123] hover:bg-[#f0ede9]"
+                            >
+                              {kota.name}
+                            </button>
+                          ))}
+                        {kotaPilihan.filter((kota) =>
+                          kota.name
+                            .toLowerCase()
+                            .includes(cityQuery.toLowerCase()),
+                        ).length === 0 && (
+                          <p className="px-3 py-2 text-xs text-[#777572]">
+                            Kota tidak ditemukan.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {cityName && (
+                    <p className="text-[11px] font-medium text-[#3b7045]">
+                      Kota terpilih: {cityName}
+                    </p>
+                  )}
+                  <p className="text-[11px] text-[#777572]">
+                    Kota ini digunakan sebagai lokasi analisis risiko gempa.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-semibold text-[#6f6d69] uppercase tracking-wide">
                       Alamat Email
@@ -347,7 +456,10 @@ export default function ProfilePage() {
                         Password Saat Ini
                       </label>
                       <div className="relative flex items-center bg-[#f7f7f5] border border-[#dedbd5] rounded-xl px-4 py-3 focus-within:border-[#202123] focus-within:bg-white transition-all">
-                        <Lock size={18} className="text-[#6f6d69] mr-3 shrink-0" />
+                        <Lock
+                          size={18}
+                          className="text-[#6f6d69] mr-3 shrink-0"
+                        />
                         <input
                           type={showCurrentPw ? "text" : "password"}
                           value={currentPassword}
@@ -360,7 +472,11 @@ export default function ProfilePage() {
                           onClick={() => setShowCurrentPw((p) => !p)}
                           className="text-[#6f6d69] hover:text-[#202123] p-1 cursor-pointer"
                         >
-                          {showCurrentPw ? <EyeSlash size={16} /> : <Eye size={16} />}
+                          {showCurrentPw ? (
+                            <EyeSlash size={16} />
+                          ) : (
+                            <Eye size={16} />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -371,7 +487,10 @@ export default function ProfilePage() {
                         Password Baru
                       </label>
                       <div className="relative flex items-center bg-[#f7f7f5] border border-[#dedbd5] rounded-xl px-4 py-3 focus-within:border-[#202123] focus-within:bg-white transition-all">
-                        <Lock size={18} className="text-[#6f6d69] mr-3 shrink-0" />
+                        <Lock
+                          size={18}
+                          className="text-[#6f6d69] mr-3 shrink-0"
+                        />
                         <input
                           type={showNewPw ? "text" : "password"}
                           value={newPassword}
@@ -384,7 +503,11 @@ export default function ProfilePage() {
                           onClick={() => setShowNewPw((p) => !p)}
                           className="text-[#6f6d69] hover:text-[#202123] p-1 cursor-pointer"
                         >
-                          {showNewPw ? <EyeSlash size={16} /> : <Eye size={16} />}
+                          {showNewPw ? (
+                            <EyeSlash size={16} />
+                          ) : (
+                            <Eye size={16} />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -395,7 +518,10 @@ export default function ProfilePage() {
                         Konfirmasi Password Baru
                       </label>
                       <div className="relative flex items-center bg-[#f7f7f5] border border-[#dedbd5] rounded-xl px-4 py-3 focus-within:border-[#202123] focus-within:bg-white transition-all">
-                        <Lock size={18} className="text-[#6f6d69] mr-3 shrink-0" />
+                        <Lock
+                          size={18}
+                          className="text-[#6f6d69] mr-3 shrink-0"
+                        />
                         <input
                           type={showNewPw ? "text" : "password"}
                           value={confirmPassword}

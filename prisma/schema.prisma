@@ -13,6 +13,9 @@ model User {
   email          String          @unique @db.VarChar(255)
   password       String          @db.VarChar(255)
   avatar         String?         @db.Text
+  cityName       String?         @map("city_name") @db.VarChar(100)
+  cityLatitude   Float?          @map("city_latitude")
+  cityLongitude  Float?          @map("city_longitude")
   createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
   communityPosts CommunityPost[]
   riskAnalyses   RiskAnalysis[]
