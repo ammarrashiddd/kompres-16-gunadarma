@@ -87,7 +87,6 @@ export async function POST(request: NextRequest) {
       analysisId: analysis.id,
       location: locationName,
       mlResult,
-      routeCandidates: [],
     });
   } catch (error) {
     console.error("Error pada API Risk Analysis:", error);

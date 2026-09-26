@@ -54,12 +54,6 @@ export default function AiGemini({ advice, loading, error }: AiGeminiProps) {
             </ul>
           </div>
 
-          <div className="border-t border-indigo-100 pt-2">
-            <p className="font-semibold text-gray-900">Shelter dan rute</p>
-            <p>{advice.recommendedShelter.reason}</p>
-            <p>{advice.routeExplanation}</p>
-          </div>
-
           <p className="border-t border-indigo-100 pt-2 text-[11px] text-gray-600">
             {advice.disclaimer}
           </p>

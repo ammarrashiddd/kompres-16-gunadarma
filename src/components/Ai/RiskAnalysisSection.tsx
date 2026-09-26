@@ -55,8 +55,6 @@ export default function RiskAnalysisSection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           analysisId: riskResult.analysisId,
-          routeCandidates: riskResult.routeCandidates,
-          mlResult: riskResult.mlResult,
         }),
       });
       const geminiResult = (await geminiResponse.json()) as

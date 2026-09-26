@@ -7,7 +7,6 @@ import type {
   GeminiStructuredAdvice,
   PreparationPriority,
   RiskAnalysisResult,
-  RouteSnapshot,
 } from "@/types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -37,15 +36,6 @@ const geminiResponseSchema = {
         required: ["priority", "title", "action", "reason"],
       },
     },
-    recommendedShelter: {
-      type: "object",
-      properties: {
-        shelterId: { type: "integer", nullable: true },
-        reason: { type: "string" },
-      },
-      required: ["shelterId", "reason"],
-    },
-    routeExplanation: { type: "string" },
     disclaimer: { type: "string" },
   },
   required: [
@@ -53,8 +43,6 @@ const geminiResponseSchema = {
     "riskInterpretation",
     "keyFactors",
     "preparationSteps",
-    "recommendedShelter",
-    "routeExplanation",
     "disclaimer",
   ],
 } as const;
@@ -65,13 +53,11 @@ function isPreparationPriority(value: unknown): value is PreparationPriority {
 
 function isGeminiStructuredAdvice(
   value: unknown,
-  routeCandidates: RouteSnapshot[],
 ): value is GeminiStructuredAdvice {
   if (!value || typeof value !== "object") return false;
 
   const advice = value as Record<string, unknown>;
   const steps = advice.preparationSteps;
-  const recommendedShelter = advice.recommendedShelter;
 
   if (
     typeof advice.summary !== "string" ||
@@ -89,24 +75,12 @@ function isGeminiStructuredAdvice(
         typeof item.reason === "string"
       );
     }) ||
-    !recommendedShelter ||
-    typeof recommendedShelter !== "object" ||
-    typeof advice.routeExplanation !== "string" ||
     typeof advice.disclaimer !== "string"
   ) {
     return false;
   }
 
-  const shelter = recommendedShelter as Record<string, unknown>;
-  if (
-    shelter.shelterId !== null &&
-    (typeof shelter.shelterId !== "number" ||
-      !routeCandidates.some((route) => route.shelter.id === shelter.shelterId))
-  ) {
-    return false;
-  }
-
-  return typeof shelter.reason === "string";
+  return true;
 }
 
 function toRiskAnalysisResult(analysis: {
@@ -162,9 +136,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const routeCandidates = Array.isArray(body.routeCandidates)
-      ? (body.routeCandidates as RouteSnapshot[])
-      : [];
     await prisma.geminiAdvice.upsert({
       where: { riskAnalysisId: analysis.id },
       create: { riskAnalysisId: analysis.id, status: "PENDING" },
@@ -173,9 +144,6 @@ export async function POST(request: NextRequest) {
 
     const mlResult = toRiskAnalysisResult(analysis);
     const locationName = analysis.locationName ?? "Lokasi analisis";
-    const routeContext = routeCandidates.length
-      ? JSON.stringify(routeCandidates)
-      : "Tidak ada shelter resmi dan rute terverifikasi yang tersedia.";
 
     const response = await ai.models.generateContent({
       model: "gemini-3.6-flash",
@@ -185,17 +153,12 @@ Analisis hasil Machine Learning untuk ${locationName} (${analysis.latitude}, ${a
 HASIL ML (jangan ubah angka ini):
 ${JSON.stringify(mlResult)}
 
-KANDIDAT SHELTER DAN RUTE DARI SERVER (jangan membuat kandidat baru):
-${routeContext}
-
-Buat penjelasan dalam Bahasa Indonesia. Jika skor sekitar 50, jelaskan persiapan tingkat sedang secara konkret. Jika tidak ada kandidat shelter, isi shelterId dengan null dan jelaskan bahwa pengguna harus mengikuti arahan BPBD/BNPB/petugas setempat.
+Buat penjelasan dalam Bahasa Indonesia. Jika skor sekitar 50, jelaskan persiapan tingkat sedang secara konkret.
 `,
       config: {
         systemInstruction: `
 Kamu adalah pakar mitigasi gempa SIGAP AI. Output harus mengikuti JSON schema.
 Skor dan fitur ML adalah fakta yang tidak boleh diubah atau dihitung ulang.
-Jangan membuat koordinat, nama shelter, jarak, durasi, atau rute baru.
-Hanya pilih shelterId dari kandidat yang diberikan server.
 Tekankan bahwa hasil ini adalah estimasi historis, bukan prediksi waktu gempa.
 `,
         responseMimeType: "application/json",
@@ -204,7 +167,7 @@ Tekankan bahwa hasil ini adalah estimasi historis, bukan prediksi waktu gempa.
     });
 
     const structuredAdvice = JSON.parse(response.text ?? "");
-    if (!isGeminiStructuredAdvice(structuredAdvice, routeCandidates)) {
+    if (!isGeminiStructuredAdvice(structuredAdvice)) {
       throw new Error("Respons Gemini tidak sesuai structured output.");
     }
 
