@@ -36,6 +36,14 @@ export interface RiskAnalysisResponse {
   mlResult: RiskAnalysisResult;
 }
 
+export interface SavedRiskAnalysisResponse {
+  success: true;
+  analysisId: number;
+  location?: string;
+  mlResult: RiskAnalysisResult;
+  aiAdvice: GeminiStructuredAdvice | null;
+}
+
 export type PreparationPriority = "URGENT" | "HIGH" | "MEDIUM";
 
 export interface PreparationStep {

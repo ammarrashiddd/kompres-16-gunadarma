@@ -2,7 +2,7 @@ import type { Prisma, RiskCategory } from "@prisma/client";
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/server-auth";
-import type { RiskAnalysisResult } from "@/types";
+import type { GeminiStructuredAdvice, RiskAnalysisResult } from "@/types";
 
 // Simulasi panggilan model Machine Learning
 async function runMachineLearningModel(
@@ -34,6 +34,73 @@ function toRiskCategory(category: string): RiskCategory {
       return "SANGAT_TINGGI";
     default:
       return "SEDANG_TINGGI";
+  }
+}
+
+function toRiskAnalysisResult(analysis: {
+  vulnerabilityScore: number;
+  category: string;
+  freqPerYear: number;
+  m5Count: number;
+  maxMagnitude: number;
+  avgDepthKm: number;
+  nearestM5DistanceKm: number;
+}): RiskAnalysisResult {
+  return {
+    vulnerabilityScore: analysis.vulnerabilityScore,
+    category: analysis.category.replaceAll("_", "-"),
+    features: {
+      freqPerYear: analysis.freqPerYear,
+      m5Count: analysis.m5Count,
+      maxMagnitude: analysis.maxMagnitude,
+      avgDepthKm: analysis.avgDepthKm,
+      nearestM5DistanceKm: analysis.nearestM5DistanceKm,
+    },
+  };
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Silakan login untuk melihat riwayat analisis." },
+        { status: 401 },
+      );
+    }
+
+    const analysis = await prisma.riskAnalysis.findFirst({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      include: { geminiAdvice: true },
+    });
+
+    if (!analysis) {
+      return NextResponse.json(
+        { error: "Belum ada analisis yang tersimpan." },
+        { status: 404 },
+      );
+    }
+
+    const storedAdvice = analysis.geminiAdvice?.structuredOutput;
+    const aiAdvice =
+      analysis.geminiAdvice?.status === "COMPLETED" && storedAdvice
+        ? (storedAdvice as unknown as GeminiStructuredAdvice)
+        : null;
+
+    return NextResponse.json({
+      success: true,
+      analysisId: analysis.id,
+      location: analysis.locationName,
+      mlResult: toRiskAnalysisResult(analysis),
+      aiAdvice,
+    });
+  } catch (error) {
+    console.error("Error mengambil riwayat Risk Analysis:", error);
+    return NextResponse.json(
+      { error: "Gagal mengambil analisis tersimpan." },
+      { status: 500 },
+    );
   }
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AiGemini from "@/components/Ai/AiGemini";
 import RiskAnalysisCard from "@/components/Ai/RiskAnalysisCard";
 import type {
@@ -8,6 +8,7 @@ import type {
   GeminiStructuredAdvice,
   RiskAnalysisResponse,
   RiskAnalysisResult,
+  SavedRiskAnalysisResponse,
 } from "@/types";
 
 const analysisLocation = {
@@ -23,6 +24,54 @@ export default function RiskAnalysisSection() {
   const [geminiLoading, setGeminiLoading] = useState(false);
   const [riskError, setRiskError] = useState<string | null>(null);
   const [geminiError, setGeminiError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadSavedAnalysis = async () => {
+      setRiskLoading(true);
+      setGeminiLoading(true);
+
+      try {
+        const response = await fetch("/api/risk-analysis");
+        if (response.status === 404) return;
+
+        const result = (await response.json()) as
+          | SavedRiskAnalysisResponse
+          | { error?: string };
+        if (!response.ok || !("mlResult" in result)) {
+          throw new Error(
+            "error" in result
+              ? result.error
+              : "Gagal memuat analisis tersimpan.",
+          );
+        }
+
+        if (!cancelled) {
+          setRiskData(result.mlResult);
+          setAdvice(result.aiAdvice);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setRiskError(
+            error instanceof Error
+              ? error.message
+              : "Gagal memuat analisis tersimpan.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setRiskLoading(false);
+          setGeminiLoading(false);
+        }
+      }
+    };
+
+    void loadSavedAnalysis();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleAnalyze = async () => {
     setRiskLoading(true);
