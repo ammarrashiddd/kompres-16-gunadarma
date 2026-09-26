@@ -1,9 +1,6 @@
 "use client";
 
-import DashboardStats from "@/components/Ai/DashboardStats";
-import EvacuationSummary from "@/components/Ai/EvacuationSummary";
-import QuickActionsAndPlates from "@/components/Ai/QuickActionsAndPlates";
-import RiskAnalysisCard from "@/components/Ai/RiskAnalysisCard";
+import RiskAnalysisSection from "@/components/Ai/RiskAnalysisSection";
 import MapGempa from "@/components/mapGempa/page";
 import Navbar from "@/components/navbar/Navbar";
 
@@ -17,9 +14,6 @@ export default function Dashboard() {
 
         <div className="mb-6 flex flex-col justify-between gap-3 px-1 md:flex-row md:items-end md:px-2">
           <div>
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#a15d3c]">
-              Pusat kendali SIGAP
-            </p>
             <h2 className="text-[clamp(1.8rem,3vw,2.8rem)] font-semibold tracking-[-0.07em] text-[#202123]">
               Selamat datang kembali.
             </h2>
@@ -32,9 +26,7 @@ export default function Dashboard() {
 
         <div className="space-y-6">
           <MapGempa />
-          <div>
-            <RiskAnalysisCard />
-          </div>
+          <RiskAnalysisSection />
         </div>
       </div>
     </main>

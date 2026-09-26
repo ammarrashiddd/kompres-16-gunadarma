@@ -1,11 +1,14 @@
-import { GoogleGenAI } from "@google/genai";
-import { NextResponse } from "next/server";
-
-// Inisialisasi Google GenAI SDK
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+import type { Prisma, RiskCategory } from "@prisma/client";
+import { type NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getAuthenticatedUser } from "@/lib/server-auth";
+import type { RiskAnalysisResult } from "@/types";
 
 // Simulasi panggilan model Machine Learning
-async function runMachineLearningModel(_lat: number, _lon: number) {
+async function runMachineLearningModel(
+  _lat: number,
+  _lon: number,
+): Promise<RiskAnalysisResult> {
   return {
     vulnerabilityScore: 72.0,
     category: "Sedang-Tinggi",
@@ -19,68 +22,77 @@ async function runMachineLearningModel(_lat: number, _lon: number) {
   };
 }
 
-export async function POST(request: Request) {
+function toRiskCategory(category: string): RiskCategory {
+  switch (category.toUpperCase().replaceAll("-", "_")) {
+    case "RENDAH":
+      return "RENDAH";
+    case "SEDANG":
+      return "SEDANG";
+    case "TINGGI":
+      return "TINGGI";
+    case "SANGAT_TINGGI":
+      return "SANGAT_TINGGI";
+    default:
+      return "SEDANG_TINGGI";
+  }
+}
+
+export async function POST(request: NextRequest) {
   try {
+    const user = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Silakan login untuk menyimpan analisis risiko." },
+        { status: 401 },
+      );
+    }
+
     const { lat, lon, locationName } = await request.json();
 
-    if (typeof lat !== "number" || typeof lon !== "number") {
+    if (
+      typeof lat !== "number" ||
+      typeof lon !== "number" ||
+      lat < -90 ||
+      lat > 90 ||
+      lon < -180 ||
+      lon > 180
+    ) {
       return NextResponse.json(
-        { error: "Koordinat lat dan lon wajib diisi" },
+        { error: "Koordinat lat dan lon valid wajib diisi" },
         { status: 400 },
       );
     }
 
-    // 1. Ambil data hasil ML
     const mlResult = await runMachineLearningModel(lat, lon);
-
-    // 2. Susun System Instruction & Input Prompt
-    const systemInstruction = `
-Kamu adalah pakar mitigasi bencana gempa bumi dari SIGAP AI.
-Tugas utama: Memberikan analisis singkat dan saran aksi praktis berdasarkan data numerik hasil prediksi Machine Learning.
-
-PRINSIP WAJIB:
-1. Dilarang mengubah, menambah, atau memprediksi angka skor kerentanan baru. Gunakan data angka persis seperti yang diberikan.
-2. Jelaskan faktor utama pemicu risiko (misal: tingginya persentase gempa dangkal atau frekuensi tahunan).
-3. Berikan 3 poin tindakan mitigasi/persiapan yang paling relevan untuk warga setempat.
-4. Gunakan bahasa Indonesia yang tegas, tenang, lugas, dan mudah dipahami.
-`;
-
-    const userPrompt = `
-Berikut adalah hasil analisis data Machine Learning untuk daerah: **${locationName || "Bekasi & Sekitarnya"}** (Lat: ${lat}, Lon: ${lon}):
-
-- Skor Kerentanan: ${mlResult.vulnerabilityScore} / 100 (${mlResult.category})
-- Frekuensi Gempa Historis: ${mlResult.features.freqPerYear} kali/tahun (Radius 100 km)
-- Kejadian Gempa M >= 5.0: ${mlResult.features.m5Count} kali
-- Magnitudo Maksimum Historis: M ${mlResult.features.maxMagnitude}
-- Rata-rata Kedalaman Pusat Gempa: ${mlResult.features.avgDepthKm} km
-- Jarak Gempa Signifikan Terdekat: ${mlResult.features.nearestM5DistanceKm} km
-
-Berikan penjelasan singkat mengenai angka risiko ini dan saran mitigasi yang konkret.
-`;
-
-    // 3. Panggil Gemini menggunakan Interactions API
-    const interaction = await ai.interactions.create({
-      model: "gemini-3.6-flash",
-      input: userPrompt,
-      system_instruction: systemInstruction,
-      store: false, // Set false jika hanya butuh permohonan sekali jalan (stateless)
+    const analysis = await prisma.riskAnalysis.create({
+      data: {
+        userId: user.id,
+        locationName: typeof locationName === "string" ? locationName : null,
+        latitude: lat,
+        longitude: lon,
+        vulnerabilityScore: mlResult.vulnerabilityScore,
+        category: toRiskCategory(mlResult.category),
+        freqPerYear: mlResult.features.freqPerYear,
+        m5Count: mlResult.features.m5Count,
+        maxMagnitude: mlResult.features.maxMagnitude,
+        avgDepthKm: mlResult.features.avgDepthKm,
+        nearestM5DistanceKm: mlResult.features.nearestM5DistanceKm,
+        modelVersion: "v1",
+        rawMlOutput: mlResult as unknown as Prisma.InputJsonValue,
+      },
     });
 
-    // Ambil hasil teks dari objek interaction
-    const aiAdvice = interaction.output_text;
-
-    // 4. Kembalikan response gabungan ke Client
     return NextResponse.json({
       success: true,
+      analysisId: analysis.id,
       location: locationName,
       mlResult,
-      aiAdvice,
-      interactionId: interaction.id, // ID interaksi jika store=true
+      routeCandidates: [],
     });
   } catch (error) {
     console.error("Error pada API Risk Analysis:", error);
     return NextResponse.json(
-      { error: "Gagal memproses analisis risiko dan rekomendasi AI" },
+      { error: "Gagal memproses analisis risiko" },
       { status: 500 },
     );
   }

@@ -15,8 +15,131 @@ model User {
   avatar         String?         @db.Text
   createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
   communityPosts CommunityPost[]
+  riskAnalyses   RiskAnalysis[]
 
   @@map("users")
+}
+
+enum RiskCategory {
+  RENDAH
+  SEDANG
+  SEDANG_TINGGI
+  TINGGI
+  SANGAT_TINGGI
+}
+
+enum GeminiGenerationStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum ShelterSource {
+  BPBD
+  BNPB
+  PEMDA
+  CURATED
+}
+
+enum ShelterVerificationStatus {
+  VERIFIED
+  NEEDS_REVIEW
+  INACTIVE
+}
+
+enum RouteStatus {
+  COMPLETED
+  FAILED
+}
+
+model RiskAnalysis {
+  id                  Int          @id @default(autoincrement())
+  userId              Int          @map("user_id")
+  locationName        String?      @map("location_name") @db.VarChar(150)
+  latitude            Float
+  longitude           Float
+  vulnerabilityScore  Float        @map("vulnerability_score")
+  category            RiskCategory
+  freqPerYear         Float        @map("freq_per_year")
+  m5Count             Int          @map("m5_count")
+  maxMagnitude        Float        @map("max_magnitude")
+  avgDepthKm          Float        @map("avg_depth_km")
+  nearestM5DistanceKm Float        @map("nearest_m5_distance_km")
+  modelName           String       @default("SIGAP-ML") @map("model_name") @db.VarChar(100)
+  modelVersion        String?      @map("model_version") @db.VarChar(50)
+  rawMlOutput         Json?        @map("raw_ml_output")
+  createdAt           DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  geminiAdvice     GeminiAdvice?
+  evacuationRoutes EvacuationRoute[]
+
+  @@index([userId, createdAt])
+  @@index([latitude, longitude])
+  @@map("risk_analyses")
+}
+
+model GeminiAdvice {
+  id               Int                    @id @default(autoincrement())
+  riskAnalysisId   Int                    @unique @map("risk_analysis_id")
+  status           GeminiGenerationStatus @default(PENDING)
+  modelName        String                 @default("gemini-3.6-flash") @map("model_name") @db.VarChar(100)
+  promptVersion    String                 @default("risk-advice-v1") @map("prompt_version") @db.VarChar(50)
+  structuredOutput Json?                  @map("structured_output")
+  rawResponse      Json?                  @map("raw_response")
+  errorMessage     String?                @map("error_message") @db.Text
+  createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  riskAnalysis RiskAnalysis @relation(fields: [riskAnalysisId], references: [id], onDelete: Cascade)
+
+  @@map("gemini_advices")
+}
+
+model Shelter {
+  id                 Int                       @id @default(autoincrement())
+  name               String                    @db.VarChar(200)
+  cityName           String                    @map("city_name") @db.VarChar(150)
+  address            String?                   @db.Text
+  latitude           Float
+  longitude          Float
+  capacity           Int?
+  facilities         Json?
+  source             ShelterSource
+  verificationStatus ShelterVerificationStatus @default(NEEDS_REVIEW) @map("verification_status")
+  lastVerifiedAt     DateTime?                 @map("last_verified_at") @db.Timestamptz(6)
+  createdAt          DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  evacuationRoutes EvacuationRoute[]
+
+  @@index([cityName, verificationStatus])
+  @@index([latitude, longitude])
+  @@map("shelters")
+}
+
+model EvacuationRoute {
+  id              Int         @id @default(autoincrement())
+  riskAnalysisId  Int         @map("risk_analysis_id")
+  shelterId       Int         @map("shelter_id")
+  status          RouteStatus
+  provider        String      @db.VarChar(80)
+  originLatitude  Float       @map("origin_latitude")
+  originLongitude Float       @map("origin_longitude")
+  distanceMeters  Int?        @map("distance_meters")
+  durationSeconds Int?        @map("duration_seconds")
+  geometry        Json?
+  steps           Json?
+  errorMessage    String?     @map("error_message") @db.Text
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  riskAnalysis RiskAnalysis @relation(fields: [riskAnalysisId], references: [id], onDelete: Cascade)
+  shelter      Shelter      @relation(fields: [shelterId], references: [id], onDelete: Cascade)
+
+  @@index([riskAnalysisId])
+  @@index([shelterId])
+  @@map("evacuation_routes")
 }
 
 model CommunityPost {
