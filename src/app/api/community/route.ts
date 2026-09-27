@@ -51,25 +51,31 @@ export async function GET(request: NextRequest) {
         ? [{ verifiedCount: "desc" }, { createdAt: "desc" }]
         : [{ createdAt: "desc" }];
 
-    const posts = await prisma.communityPost.findMany({
-      where: whereClause,
-      orderBy,
-      take: limit,
-      include: {
-        user: {
-          select: {
-            id: true,
-            nama: true,
-            avatar: true,
+    const [posts, user] = await Promise.all([
+      prisma.communityPost.findMany({
+        where: whereClause,
+        orderBy,
+        take: limit,
+        include: {
+          user: {
+            select: {
+              id: true,
+              nama: true,
+              avatar: true,
+            },
           },
         },
-      },
-    });
+      }),
+      getAuthenticatedUser(request),
+    ]);
 
     return NextResponse.json({
       success: true,
       count: posts.length,
-      data: posts,
+      data: posts.map((post) => ({
+        ...post,
+        isOwner: user?.id === post.userId,
+      })),
     });
   } catch (error) {
     console.error("[GET /api/community error]:", error);
