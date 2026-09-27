@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   ActivityIcon as Activity,
@@ -64,12 +64,6 @@ export default function HomePage() {
               >
                 {isLoggedIn ? "Buka Dashboard" : "Mulai dengan SIGAP"}{" "}
                 <ArrowRight size={17} weight="bold" />
-              </Link>
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-full border border-[#d8d5d0] bg-white px-5 py-3 text-sm font-semibold text-[#202123] transition-all hover:border-[#c85b31] active:scale-[0.98]"
-              >
-                Lihat dashboard
               </Link>
             </div>
             <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-xs text-[#777572]">
@@ -190,3 +184,4 @@ export default function HomePage() {
     </main>
   );
 }
+
