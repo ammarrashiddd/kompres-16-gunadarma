@@ -9,7 +9,10 @@ interface UserMenuProps {
   userEmail?: string | null;
   userImage?: string | null;
   onLogout: () => void;
-  onProfileUpdated?: (updated: { nama: string; avatar?: string | null }) => void;
+  onProfileUpdated?: (updated: {
+    nama: string;
+    avatar?: string | null;
+  }) => void;
 }
 
 export default function UserMenu({
@@ -63,7 +66,7 @@ export default function UserMenu({
               {userName.charAt(0).toUpperCase() || "U"}
             </div>
           )}
-          <span className="text-xs md:text-sm font-semibold text-[#202123] max-w-[140px] truncate">
+          <span className="text-xs md:text-sm font-semibold text-[#202123] max-w-35 truncate">
             Halo, {userName}
           </span>
           <CaretDown
@@ -80,9 +83,13 @@ export default function UserMenu({
           <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white p-2 shadow-[0_16px_40px_rgba(48,43,38,0.12)] border border-[#dedbd5] z-50 animate-in fade-in zoom-in-95 duration-150">
             {/* User profile header */}
             <div className="px-3 py-2 border-b border-[#f0ede9] mb-1">
-              <p className="text-xs font-bold text-[#202123] truncate">{userName}</p>
+              <p className="text-xs font-bold text-[#202123] truncate">
+                {userName}
+              </p>
               {userEmail && (
-                <p className="text-[11px] text-[#6f6d69] truncate mt-0.5">{userEmail}</p>
+                <p className="text-[11px] text-[#6f6d69] truncate mt-0.5">
+                  {userEmail}
+                </p>
               )}
             </div>
 
@@ -90,7 +97,7 @@ export default function UserMenu({
             <Link
               href="/profile"
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-semibold text-[#202123] rounded-xl hover:bg-[#f7f7f5] transition-colors duration-150 cursor-pointer"
+              className="text-[#202123] hover:bg-[#f7f7f5] text-xs flex w-full cursor-pointer appearance-none items-center gap-2.5 rounded-xl px-3 py-2 font-semibold leading-4 transition-colors duration-150"
             >
               <Gear size={16} weight="bold" className="text-[#a15d3c]" />
               Edit Profil
@@ -103,7 +110,7 @@ export default function UserMenu({
                 setIsOpen(false);
                 onLogout();
               }}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-semibold text-red-600 rounded-xl hover:bg-red-50 transition-colors duration-150 cursor-pointer mt-0.5"
+              className="text-red-600 hover:bg-[#f7f7f5] text-xs! flex w-full cursor-pointer appearance-none items-center gap-2.5 rounded-xl px-3 py-2 font-semibold! leading-4 transition-colors duration-150"
             >
               <SignOut size={16} weight="bold" />
               Keluar (Logout)

@@ -14,6 +14,8 @@ const geminiResponseSchema = {
     riskInterpretation: { type: "string" },
     keyFactors: {
       type: "array",
+      minItems: 6,
+      maxItems: 6,
       items: { type: "string" },
     },
     disclaimer: { type: "string" },
@@ -111,7 +113,7 @@ export async function POST(request: NextRequest) {
     HASIL ML (gunakan sebagai fakta dan jangan ubah, hitung ulang, atau menambahkan angka baru):
 ${JSON.stringify(mlResult)}
 
-    Buat penjelasan dalam Bahasa Indonesia yang rinci tetapi mudah dibaca dan tidak menakut-nakuti. Summary harus terdiri dari 3-4 kalimat yang menjelaskan gambaran besarnya. Risk interpretation harus terdiri dari 2-3 kalimat yang menguraikan arti skor dan kategori bagi pengguna. Key factors harus berisi minimal 5 dan maksimal 6 poin, mencakup skor/kategori serta setiap fitur ML dengan angka asli dan makna praktisnya. Gunakan satuan yang jelas dan hindari jargon tanpa penjelasan.
+    Buat penjelasan dalam Bahasa Indonesia yang rinci, beralasan, tetapi tetap mudah dibaca dan tidak menakut-nakuti. Summary harus terdiri dari 5-6 kalimat: sebutkan hasil utama, arti kategori bagi lokasi tersebut, alasan umum yang terlihat dari data, dan batasan makna hasilnya bagi pengguna. Risk interpretation harus terdiri dari 4-5 kalimat yang menjelaskan hubungan skor dengan kategori, mengapa hasilnya berada pada tingkat tersebut berdasarkan data yang tersedia, apa yang bisa dan tidak bisa disimpulkan, serta bagaimana pengguna sebaiknya memahami hasil itu. Key factors harus berisi tepat 6 poin: satu poin untuk skor/kategori dan satu poin untuk masing-masing dari lima fitur ML. Setiap poin wajib menyebut angka aslinya, menjelaskan arti angka dengan bahasa awam, lalu memberikan alasan mengapa angka tersebut relevan terhadap penilaian risiko. Gunakan satuan yang jelas dan hindari jargon tanpa penjelasan.
 `,
       config: {
         systemInstruction: `
@@ -120,9 +122,9 @@ ${JSON.stringify(mlResult)}
     Aturan wajib:
     - Skor kerentanan, kategori, dan seluruh fitur ML adalah fakta. Jangan mengubah, membulatkan secara menyesatkan, menghitung ulang, atau membuat angka/ambang baru.
     - Jelaskan istilah teknis dengan bahasa sehari-hari. Contoh: magnitudo adalah ukuran kekuatan gempa, kedalaman adalah seberapa jauh pusat gempa dari permukaan, dan jarak adalah perkiraan jarak dari lokasi analisis ke gempa terdekat.
-    - summary harus menjadi ringkasan 3-4 kalimat yang langsung menjawab: "Apa arti hasil ini bagi saya?" Jelaskan tingkat risikonya secara proporsional.
-    - riskInterpretation harus menjelaskan arti skor dan kategori secara proporsional, tanpa menyatakan bahwa gempa pasti terjadi.
-    - keyFactors harus berisi minimal 5 poin penjelasan yang menghubungkan setiap angka ML dengan makna sederhananya. Jangan hanya menyalin nama field atau membuat kesimpulan sebab-akibat yang tidak ada dalam data.
+    - summary harus menjadi ringkasan 5-6 kalimat yang langsung menjawab: "Apa arti hasil ini bagi saya?" Setiap kesimpulan penting harus disertai alasan yang dapat ditelusuri ke data ML.
+    - riskInterpretation harus terdiri dari 4-5 kalimat. Jelaskan alasan kategori secara hati-hati berdasarkan pola data, bukan berdasarkan dugaan kondisi bangunan atau prediksi masa depan.
+    - keyFactors harus berisi tepat 6 poin: skor/kategori, frekuensi per tahun, jumlah gempa M 5 atau lebih, magnitudo maksimum, kedalaman rata-rata, dan jarak gempa M 5 atau lebih terdekat. Setiap poin harus memuat format "angka -> arti sederhana -> alasan relevan" dan tidak boleh hanya menyalin nama field.
     - Jangan memberikan langkah persiapan, daftar tindakan, atau rekomendasi mitigasi dalam output ini. Fokus hanya pada penerjemahan dan penjelasan hasil analisis.
     - Jangan menakut-nakuti, menjanjikan keselamatan, atau menyatakan kapan gempa akan terjadi.
     - Tekankan bahwa hasil ini adalah estimasi berdasarkan pola historis/statistik, bukan prediksi waktu terjadinya gempa. Pengguna tetap harus mengikuti arahan BMKG, BNPB/BPBD, dan petugas setempat.
