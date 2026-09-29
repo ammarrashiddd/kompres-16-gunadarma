@@ -3,7 +3,7 @@
 import {
   ArrowClockwise,
   Check,
-  CheckCircle,
+  MapTrifold,
   MagnifyingGlass,
   MapPin,
   PencilSimple,
@@ -14,6 +14,7 @@ import {
   Trash,
   X,
 } from "@phosphor-icons/react";
+import dynamic from "next/dynamic";
 import {
   type ChangeEvent,
   type FormEvent,
@@ -22,6 +23,7 @@ import {
   useState,
 } from "react";
 import ConfirmDialog from "@/components/dialog/ConfirmDialog";
+import Toast from "@/components/feedback/Toast";
 import Navbar from "@/components/navbar/Navbar";
 import type { KotaPilihan } from "@/lib/namaDaerah/kotaPilihan";
 import {
@@ -34,6 +36,18 @@ import {
   updateCommunityPost,
   verifyCommunityPost,
 } from "@/lib/api";
+
+const CommunityReportMap = dynamic(
+  () => import("@/components/community/CommunityReportMap"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[min(72vh,760px)] min-h-115 items-center justify-center rounded-3xl border border-[#dedbd5] bg-[#eeece8] text-sm font-medium text-[#777572]">
+        Memuat peta laporan...
+      </div>
+    ),
+  },
+);
 
 const damageLevels: DamageLevel[] = ["RINGAN", "SEDANG", "BERAT", "DARURAT"];
 
@@ -503,6 +517,7 @@ export default function CommunityPage() {
   const [activeDamage, setActiveDamage] = useState<DamageLevel | "">("");
   const [damageInput, setDamageInput] = useState<DamageLevel | "">("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [showReportMap, setShowReportMap] = useState(false);
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
   const [pendingDelete, setPendingDelete] = useState<CommunityPost | null>(
     null,
@@ -651,6 +666,20 @@ export default function CommunityPage() {
           </button>
         </section>
 
+        <section className="mb-5 px-1 md:px-2">
+          <button
+            aria-expanded={showReportMap}
+            className="inline-flex items-center gap-2 rounded-xl border border-[#dedbd5] bg-white px-4 py-3 text-sm font-semibold text-[#4b4a47] shadow-sm transition hover:border-[#c85b31]/40 hover:bg-[#fffaf6] hover:text-[#a44b29] active:scale-[0.99]"
+            onClick={() => setShowReportMap((current) => !current)}
+            type="button"
+          >
+            <MapTrifold size={18} weight="duotone" />
+            {showReportMap
+              ? "Sembunyikan peta laporan"
+              : "Tampilkan peta laporan"}
+          </button>
+        </section>
+
         <section className="mb-5 rounded-2xl border border-[#e5e3df] bg-white p-4 shadow-sm md:p-5">
           <form
             className="grid gap-3 md:grid-cols-[minmax(0,1fr)_190px_auto]"
@@ -717,6 +746,15 @@ export default function CommunityPage() {
           </div>
         </section>
 
+        {showReportMap && (
+          <div className="mt-4 mb-4">
+            <CommunityReportMap
+              onClose={() => setShowReportMap(false)}
+              posts={posts}
+            />
+          </div>
+        )}
+
         {error && !modalOpen && (
           <div
             className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
@@ -725,16 +763,6 @@ export default function CommunityPage() {
             {error}
           </div>
         )}
-        {notice && (
-          <output
-            className="mb-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-            aria-live="polite"
-          >
-            <CheckCircle className="mt-0.5 shrink-0" size={17} weight="fill" />
-            {notice}
-          </output>
-        )}
-
         <section aria-label="Daftar laporan komunitas">
           {loading ? (
             <div className="flex min-h-52 items-center justify-center gap-2 text-sm text-[#777572]">
@@ -918,6 +946,15 @@ export default function CommunityPage() {
         }}
         open={pendingDelete !== null}
         title="Hapus laporan ini?"
+      />
+
+      <Toast
+        description={notice ?? ""}
+        durationMs={3500}
+        onClose={() => setNotice(null)}
+        open={notice !== null}
+        title="Laporan berhasil diperbarui"
+        tone="success"
       />
     </main>
   );
