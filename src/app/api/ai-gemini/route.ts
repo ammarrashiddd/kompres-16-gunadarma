@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
     const locationName = analysis.locationName ?? "Lokasi analisis";
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
+      model: "gemini-3.1-flash-lite",
       contents: `
 Analisis hasil Machine Learning untuk ${locationName} (${analysis.latitude}, ${analysis.longitude}).
 

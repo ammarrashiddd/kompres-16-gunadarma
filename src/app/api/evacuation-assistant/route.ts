@@ -296,7 +296,7 @@ Berikan instruksi evakuasi darurat detik ini juga untuk kondisi berikut:
 `;
 
     const interaction = await ai.interactions.create({
-      model: "gemini-3.6-flash",
+      model: "gemini-3.1-flash-lite",
       input: userPrompt,
       system_instruction: systemInstruction,
       store: false,
