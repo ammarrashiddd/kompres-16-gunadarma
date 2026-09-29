@@ -149,7 +149,7 @@ export default function RiskAnalysisSection() {
 
   return (
     <div className="space-y-4">
-      <div>
+      <div className="flex flex-col gap-5">
         <RiskAnalysisCard
           data={riskData}
           locationName={cityName}
