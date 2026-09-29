@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
 import UserMenu from "./UserMenu";
 
 export default function NavLanding() {
@@ -81,7 +81,13 @@ export default function NavLanding() {
 
   if (isLoggedIn) {
     return (
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
+        <Link
+          href="/dashboard"
+          className="rounded-full bg-[#202123] px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-[#38393a]"
+        >
+          Dashboard
+        </Link>
         <UserMenu
           userName={userName || "Pengguna"}
           userEmail={userEmail}
@@ -94,6 +100,12 @@ export default function NavLanding() {
 
   return (
     <div className="flex items-center gap-2">
+      <Link
+        href="/dashboard"
+        className="rounded-full border border-[#d9d5d0] px-4 py-2 text-sm font-semibold text-[#202123] transition-colors duration-150 hover:bg-[#eeece8]"
+      >
+        Dashboard
+      </Link>
       <Link
         href="/login"
         className="rounded-full px-4 py-2 text-sm font-medium text-[#6f6d69] transition-colors duration-150 hover:text-[#202123]"
