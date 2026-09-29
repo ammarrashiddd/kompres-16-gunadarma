@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/server-auth";
+import { findKotaPilihan } from "@/lib/namaDaerah/kotaPilihan";
 
 const VALID_DAMAGE_LEVELS = ["RINGAN", "SEDANG", "BERAT", "DARURAT"] as const;
 type DamageLevel = (typeof VALID_DAMAGE_LEVELS)[number];
@@ -106,15 +107,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     }
 
     const body = await request.json();
-    const {
-      title,
-      description,
-      locationName,
-      damageLevel,
-      imageUrl,
-      latitude,
-      longitude,
-    } = body;
+    const { title, description, locationName, damageLevel, imageUrl } = body;
 
     const updateData: Prisma.CommunityPostUpdateInput = {};
 
@@ -125,7 +118,19 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       updateData.description = description.trim();
     }
     if (typeof locationName === "string" && locationName.trim().length >= 2) {
-      updateData.locationName = locationName.trim();
+      const selectedCity = await findKotaPilihan(locationName.trim());
+      if (!selectedCity) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Pilih kota dari daftar lokasi yang tersedia.",
+          },
+          { status: 400 },
+        );
+      }
+      updateData.locationName = selectedCity.name;
+      updateData.latitude = selectedCity.latitude;
+      updateData.longitude = selectedCity.longitude;
     }
     if (damageLevel) {
       const norm = damageLevel.toString().toUpperCase();
@@ -139,9 +144,6 @@ export async function PUT(request: NextRequest, context: RouteContext) {
           ? imageUrl.trim()
           : null;
     }
-    if (typeof latitude === "number") updateData.latitude = latitude;
-    if (typeof longitude === "number") updateData.longitude = longitude;
-
     const updatedPost = await prisma.communityPost.update({
       where: { id: postId },
       data: updateData,

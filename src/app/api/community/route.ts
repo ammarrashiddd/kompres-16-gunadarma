@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/server-auth";
+import { findKotaPilihan } from "@/lib/namaDaerah/kotaPilihan";
 
 const VALID_DAMAGE_LEVELS = ["RINGAN", "SEDANG", "BERAT", "DARURAT"] as const;
 type DamageLevel = (typeof VALID_DAMAGE_LEVELS)[number];
@@ -118,8 +119,6 @@ export async function POST(request: NextRequest) {
       locationName,
       damageLevel = "RINGAN",
       imageUrl,
-      latitude,
-      longitude,
     } = body;
 
     // Validasi Field Wajib
@@ -162,6 +161,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const selectedCity = await findKotaPilihan(locationName.trim());
+    if (!selectedCity) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Pilih kota dari daftar lokasi yang tersedia.",
+        },
+        { status: 400 },
+      );
+    }
+
     const normalizedDamageLevel = damageLevel.toString().toUpperCase();
     if (!VALID_DAMAGE_LEVELS.includes(normalizedDamageLevel as DamageLevel)) {
       return NextResponse.json(
@@ -178,14 +188,14 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         title: title.trim(),
         description: description.trim(),
-        locationName: locationName.trim(),
+        locationName: selectedCity.name,
         damageLevel: normalizedDamageLevel,
         imageUrl:
           typeof imageUrl === "string" && imageUrl.trim()
             ? imageUrl.trim()
             : null,
-        latitude: typeof latitude === "number" ? latitude : null,
-        longitude: typeof longitude === "number" ? longitude : null,
+        latitude: selectedCity.latitude,
+        longitude: selectedCity.longitude,
       },
       include: {
         user: {

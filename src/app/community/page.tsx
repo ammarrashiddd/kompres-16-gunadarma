@@ -14,8 +14,16 @@ import {
   Trash,
   X,
 } from "@phosphor-icons/react";
-import { type FormEvent, useCallback, useEffect, useState } from "react";
+import {
+  type ChangeEvent,
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+import ConfirmDialog from "@/components/dialog/ConfirmDialog";
 import Navbar from "@/components/navbar/Navbar";
+import type { KotaPilihan } from "@/lib/namaDaerah/kotaPilihan";
 import {
   type CommunityPost,
   type CommunityPostInput,
@@ -50,8 +58,13 @@ function formatDate(value: string) {
       }).format(date);
 }
 
-function getSafeImageUrl(value: string | null) {
+function getSafeImageSource(value: string | null) {
   if (!value) return null;
+  if (
+    /^data:image\/(?:png|jpe?g|webp|gif);base64,[a-zA-Z0-9+/=]+$/.test(value)
+  ) {
+    return value;
+  }
   try {
     const url = new URL(value);
     return url.protocol === "http:" || url.protocol === "https:"
@@ -80,6 +93,10 @@ function ReportForm({
   const [title, setTitle] = useState(post?.title ?? "");
   const [description, setDescription] = useState(post?.description ?? "");
   const [locationName, setLocationName] = useState(post?.locationName ?? "");
+  const [locationQuery, setLocationQuery] = useState(post?.locationName ?? "");
+  const [showLocationOptions, setShowLocationOptions] = useState(false);
+  const [kotaPilihan, setKotaPilihan] = useState<readonly KotaPilihan[]>([]);
+  const [loadingCities, setLoadingCities] = useState(true);
   const [damageLevel, setDamageLevel] = useState<DamageLevel>(
     post?.damageLevel ?? "RINGAN",
   );
@@ -96,20 +113,95 @@ function ReportForm({
       : String(post.longitude),
   );
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCities() {
+      try {
+        const response = await fetch("/api/cities");
+        const result = (await response.json()) as {
+          success?: boolean;
+          data?: readonly KotaPilihan[];
+          message?: string;
+        };
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || "Gagal memuat daftar kota.");
+        }
+
+        if (!cancelled) {
+          setKotaPilihan(result.data ?? []);
+        }
+      } catch (cityError) {
+        if (!cancelled) {
+          setValidationError(
+            cityError instanceof Error
+              ? cityError.message
+              : "Gagal memuat daftar kota.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingCities(false);
+        }
+      }
+    }
+
+    void loadCities();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function handleLocationChange(value: string) {
+    setLocationQuery(value);
+    setLocationName("");
+    setLatitude("");
+    setLongitude("");
+    setShowLocationOptions(true);
+    setValidationError(null);
+  }
+
+  function selectLocation(city: KotaPilihan) {
+    setLocationName(city.name);
+    setLocationQuery(city.name);
+    setLatitude(String(city.latitude));
+    setLongitude(String(city.longitude));
+    setShowLocationOptions(false);
+    setValidationError(null);
+  }
+
+  function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setValidationError(null);
+    if (!file.type.startsWith("image/")) {
+      setValidationError("Pilih file foto yang valid.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setValidationError("Ukuran foto maksimal 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setImageUrl(reader.result);
+      }
+    };
+    reader.onerror = () => setValidationError("Foto tidak dapat dibaca.");
+    reader.readAsDataURL(file);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setValidationError(null);
-    if (imageUrl.trim()) {
-      try {
-        const image = new URL(imageUrl.trim());
-        if (image.protocol !== "http:" && image.protocol !== "https:") {
-          setValidationError("Gunakan tautan foto HTTP atau HTTPS.");
-          return;
-        }
-      } catch {
-        setValidationError("Masukkan tautan foto yang valid.");
-        return;
-      }
+    if (!kotaPilihan.some((city) => city.name === locationName)) {
+      setValidationError("Pilih kota dari hasil pencarian lokasi.");
+      return;
     }
 
     const input: CommunityPostInput = {
@@ -117,7 +209,7 @@ function ReportForm({
       description: description.trim(),
       locationName: locationName.trim(),
       damageLevel,
-      imageUrl: imageUrl.trim() || null,
+      imageUrl: imageUrl || null,
       ...(latitude.trim() ? { latitude: Number(latitude) } : {}),
       ...(longitude.trim() ? { longitude: Number(longitude) } : {}),
     };
@@ -220,16 +312,65 @@ function ReportForm({
               >
                 Lokasi
               </label>
-              <input
-                className={inputClass}
-                id="report-location"
-                maxLength={150}
-                minLength={2}
-                onChange={(event) => setLocationName(event.target.value)}
-                placeholder="Nama jalan, area, atau kelurahan"
-                required
-                value={locationName}
-              />
+              <div className="relative">
+                <MagnifyingGlass
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#99958f]"
+                  size={17}
+                />
+                <input
+                  aria-autocomplete="list"
+                  aria-controls="report-location-options"
+                  aria-expanded={showLocationOptions}
+                  className={`${inputClass} pl-10`}
+                  id="report-location"
+                  onBlur={() =>
+                    window.setTimeout(() => setShowLocationOptions(false), 150)
+                  }
+                  onChange={(event) => handleLocationChange(event.target.value)}
+                  onFocus={() => setShowLocationOptions(true)}
+                  placeholder={
+                    loadingCities ? "Memuat daftar kota..." : "Cari kota..."
+                  }
+                  required
+                  value={locationQuery}
+                />
+                {showLocationOptions && !loadingCities && (
+                  <div
+                    className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-xl border border-[#dedbd5] bg-white p-1 shadow-lg"
+                    id="report-location-options"
+                    role="listbox"
+                  >
+                    {kotaPilihan
+                      .filter((city) =>
+                        city.name
+                          .toLowerCase()
+                          .includes(locationQuery.toLowerCase()),
+                      )
+                      .slice(0, 50)
+                      .map((city) => (
+                        <button
+                          className="block w-full rounded-lg px-3 py-2 text-left text-sm text-[#202123] hover:bg-[#f0ede9]"
+                          key={city.id}
+                          onClick={() => selectLocation(city)}
+                          role="option"
+                          type="button"
+                        >
+                          {city.name}
+                        </button>
+                      ))}
+                    {kotaPilihan.filter((city) =>
+                      city.name
+                        .toLowerCase()
+                        .includes(locationQuery.toLowerCase()),
+                    ).length === 0 && (
+                      <p className="px-3 py-2 text-xs text-[#777572]">
+                        Kota tidak ditemukan.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             <div>
               <label
@@ -260,50 +401,68 @@ function ReportForm({
               className="text-xs font-semibold text-[#4b4a47]"
               htmlFor="report-image"
             >
-              Tautan foto{" "}
+              Foto laporan{" "}
               <span className="font-normal text-[#99958f]">(opsional)</span>
             </label>
-            <input
-              className={inputClass}
-              id="report-image"
-              onChange={(event) => setImageUrl(event.target.value)}
-              placeholder="https://..."
-              type="url"
-              value={imageUrl}
-            />
+            <div className="mt-1.5 rounded-xl border border-dashed border-[#d8d5d0] bg-white p-3">
+              <input
+                accept="image/*"
+                className="block w-full text-xs text-[#777572] file:mr-3 file:rounded-lg file:border-0 file:bg-[#f1e5df] file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#a44b29] hover:file:bg-[#eadbd3]"
+                id="report-image"
+                onChange={handleImageChange}
+                type="file"
+              />
+              {imageUrl && (
+                <div className="relative mt-3 overflow-hidden rounded-lg border border-[#e5e3df] bg-[#fbfaf9]">
+                  <img
+                    alt="Pratinjau foto laporan"
+                    className="max-h-48 w-full object-contain"
+                    src={imageUrl}
+                  />
+                  <button
+                    className="absolute right-2 top-2 rounded-lg bg-white/90 p-1.5 text-[#777572] shadow-sm transition hover:bg-white hover:text-red-700"
+                    onClick={() => setImageUrl("")}
+                    type="button"
+                  >
+                    <X size={15} />
+                    <span className="sr-only">Hapus foto</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            <p className="mt-1.5 text-[11px] text-[#777572]">
+              Pilih foto dari perangkat Anda. Maksimal 5MB.
+            </p>
           </div>
 
-          <details className="rounded-xl border border-[#e5e3df] bg-white/70 px-4 py-3">
-            <summary className="cursor-pointer text-xs font-semibold text-[#6f6d69]">
-              Tambahkan koordinat (opsional)
-            </summary>
+          <div className="rounded-xl border border-[#e5e3df] bg-white/70 px-4 py-3">
+            <p className="text-xs font-semibold text-[#6f6d69]">
+              Koordinat kota
+            </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <label className="text-xs font-medium text-[#6f6d69]">
                 Latitude
                 <input
-                  className={inputClass}
-                  max="90"
-                  min="-90"
-                  onChange={(event) => setLatitude(event.target.value)}
-                  step="any"
-                  type="number"
+                  className={`${inputClass} cursor-not-allowed bg-[#eeece8]`}
+                  readOnly
+                  type="text"
                   value={latitude}
                 />
               </label>
               <label className="text-xs font-medium text-[#6f6d69]">
                 Longitude
                 <input
-                  className={inputClass}
-                  max="180"
-                  min="-180"
-                  onChange={(event) => setLongitude(event.target.value)}
-                  step="any"
-                  type="number"
+                  className={`${inputClass} cursor-not-allowed bg-[#eeece8]`}
+                  readOnly
+                  type="text"
                   value={longitude}
                 />
               </label>
             </div>
-          </details>
+            <p className="mt-2 text-[11px] text-[#777572]">
+              Koordinat mengikuti kota yang dipilih.
+            </p>
+          </div>
 
           <div className="flex flex-col-reverse gap-2 border-t border-[#e5e3df] pt-4 sm:flex-row sm:justify-end">
             <button
@@ -345,6 +504,10 @@ export default function CommunityPage() {
   const [damageInput, setDamageInput] = useState<DamageLevel | "">("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<CommunityPost | null>(
+    null,
+  );
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -409,22 +572,15 @@ export default function CommunityPage() {
   }
 
   async function handleDelete(post: CommunityPost) {
-    if (
-      !window.confirm(
-        `Hapus laporan "${post.title}"? Tindakan ini tidak dapat dibatalkan.`,
-      )
-    ) {
-      return;
-    }
-
     setBusyPostId(post.id);
-    setError(null);
+    setDeleteError(null);
     try {
       const message = await deleteCommunityPost(post.id);
+      setPendingDelete(null);
       setNotice(message);
       await loadPosts(true);
     } catch (deleteError) {
-      setError(
+      setDeleteError(
         deleteError instanceof Error
           ? deleteError.message
           : "Gagal menghapus laporan.",
@@ -610,7 +766,7 @@ export default function CommunityPage() {
               {posts.map((post) => {
                 const isOwner = post.isOwner === true;
                 const busy = busyPostId === post.id;
-                const imageUrl = getSafeImageUrl(post.imageUrl);
+                const imageSource = getSafeImageSource(post.imageUrl);
                 return (
                   <article
                     className="flex min-w-0 flex-col rounded-2xl border border-[#e5e3df] bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
@@ -640,7 +796,10 @@ export default function CommunityPage() {
                             aria-label={`Hapus laporan ${post.title}`}
                             className="rounded-lg p-2 text-[#777572] transition hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
                             disabled={busy}
-                            onClick={() => void handleDelete(post)}
+                            onClick={() => {
+                              setDeleteError(null);
+                              setPendingDelete(post);
+                            }}
                             type="button"
                           >
                             {busy ? (
@@ -659,15 +818,12 @@ export default function CommunityPage() {
                     <p className="mt-2 line-clamp-4 whitespace-pre-wrap text-sm leading-6 text-[#66635f]">
                       {post.description}
                     </p>
-                    {imageUrl && (
-                      <a
-                        className="mt-3 inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-[#a44b29] underline decoration-[#d8b6a8] underline-offset-4 hover:text-[#7e351b]"
-                        href={imageUrl}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
-                        Lihat foto laporan
-                      </a>
+                    {imageSource && (
+                      <img
+                        alt={`Foto ${post.title}`}
+                        className="mt-3 max-h-72 w-full rounded-xl border border-[#e5e3df] object-cover"
+                        src={imageSource}
+                      />
                     )}
 
                     <div className="mt-4 flex items-center gap-2 text-xs text-[#777572]">
@@ -738,6 +894,31 @@ export default function CommunityPage() {
           submitting={submitting}
         />
       )}
+
+      <ConfirmDialog
+        cancelLabel="Batal"
+        confirmLabel="Hapus laporan"
+        description={
+          <>
+            Laporan{" "}
+            <strong className="text-[#202123]">{pendingDelete?.title}</strong>{" "}
+            akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.
+          </>
+        }
+        error={deleteError}
+        loading={pendingDelete !== null && busyPostId === pendingDelete.id}
+        onCancel={() => {
+          if (busyPostId === null) {
+            setDeleteError(null);
+            setPendingDelete(null);
+          }
+        }}
+        onConfirm={() => {
+          if (pendingDelete) void handleDelete(pendingDelete);
+        }}
+        open={pendingDelete !== null}
+        title="Hapus laporan ini?"
+      />
     </main>
   );
 }

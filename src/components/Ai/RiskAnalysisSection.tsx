@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import AiGemini from "@/components/Ai/AiGemini";
 import RiskAnalysisCard from "@/components/Ai/RiskAnalysisCard";
+import Toast from "@/components/feedback/Toast";
 import type {
   GeminiAdviceResponse,
   GeminiStructuredAdvice,
@@ -80,16 +80,6 @@ export default function RiskAnalysisSection() {
       cancelled = true;
     };
   }, []);
-
-  useEffect(() => {
-    if (!showCityPrompt) return;
-
-    const timeoutId = window.setTimeout(() => {
-      setShowCityPrompt(false);
-    }, 2000);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [showCityPrompt]);
 
   const handleAnalyze = async () => {
     setRiskLoading(true);
@@ -169,24 +159,14 @@ export default function RiskAnalysisSection() {
         />
         <AiGemini advice={advice} loading={isLoading} error={geminiError} />
       </div>
-      <div>
-        {showCityPrompt && (
-          <div className="fixed right-4 top-4 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 shadow-lg">
-            <p className="text-sm font-semibold text-amber-950">
-              Pilih kota di profile terlebih dahulu
-            </p>
-            <p className="mt-1 text-xs leading-relaxed text-amber-800">
-              Lokasi ini diperlukan untuk menjalankan analisis risiko.
-            </p>
-            <Link
-              href="/profile"
-              className="mt-2 inline-block text-xs font-semibold text-amber-950 underline underline-offset-2 hover:text-amber-700"
-            >
-              Buka Profile
-            </Link>
-          </div>
-        )}
-      </div>
+      <Toast
+        actionHref="/profile"
+        actionLabel="Buka Profile"
+        description="Lokasi ini diperlukan untuk menjalankan analisis risiko."
+        onClose={() => setShowCityPrompt(false)}
+        open={showCityPrompt}
+        title="Pilih kota di profile terlebih dahulu"
+      />
     </div>
   );
 }
