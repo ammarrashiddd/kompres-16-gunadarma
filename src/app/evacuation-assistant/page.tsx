@@ -10,7 +10,7 @@ import {
   Spinner,
   Warning,
 } from "@phosphor-icons/react";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import Navbar from "@/components/navbar/Navbar";
 import {
   type EvacuationGuidance,
@@ -86,7 +86,45 @@ export default function EvacuationAssistantPage() {
   const [specialConditions, setSpecialConditions] = useState<string[]>([]);
   const [guidance, setGuidance] = useState<EvacuationGuidance | null>(null);
   const [loading, setLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadProfileLocation() {
+      try {
+        const response = await fetch("/api/user/profile");
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || "Gagal memuat lokasi profil.");
+        }
+
+        if (!cancelled) {
+          setLocationName(result.data?.cityName || "");
+        }
+      } catch (profileError) {
+        if (!cancelled) {
+          setError(
+            profileError instanceof Error
+              ? profileError.message
+              : "Gagal memuat lokasi profil.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setProfileLoading(false);
+        }
+      }
+    }
+
+    void loadProfileLocation();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function toggleSpecialCondition(value: string) {
     setSpecialConditions((current) =>
@@ -100,6 +138,14 @@ export default function EvacuationAssistantPage() {
     event.preventDefault();
     setError(null);
     setGuidance(null);
+
+    if (!locationName.trim()) {
+      setError(
+        "Pilih kota di halaman profil sebelum meminta panduan evakuasi.",
+      );
+      return;
+    }
+
     setLoading(true);
 
     const request: EvacuationRequest = {
@@ -191,8 +237,7 @@ export default function EvacuationAssistantPage() {
                   className="text-xs font-semibold text-[#4b4a47]"
                   htmlFor="location"
                 >
-                  Lokasi kamu{" "}
-                  <span className="font-normal text-[#99958f]">(opsional)</span>
+                  Lokasi kamu
                 </label>
                 <div className="relative">
                   <MapPin
@@ -201,14 +246,20 @@ export default function EvacuationAssistantPage() {
                     size={17}
                   />
                   <input
-                    className={`${fieldClass} pl-10`}
+                    className={`${fieldClass} cursor-not-allowed pl-10 bg-[#eeece8]`}
                     id="location"
-                    maxLength={150}
-                    onChange={(event) => setLocationName(event.target.value)}
-                    placeholder="Contoh: Padang, Sumatera Barat"
+                    readOnly
+                    placeholder={
+                      profileLoading
+                        ? "Memuat lokasi profil..."
+                        : "Belum ada kota di profil"
+                    }
                     value={locationName}
                   />
                 </div>
+                <p className="mt-1.5 text-[11px] text-[#777572]">
+                  Lokasi diambil dari kota yang tersimpan di profil Anda.
+                </p>
               </div>
 
               <fieldset>

@@ -38,22 +38,6 @@ export default function AiGemini({ advice, loading, error }: AiGeminiProps) {
             </ul>
           </div>
 
-          <div>
-            <p className="mb-1 font-semibold text-gray-900">
-              Langkah persiapan
-            </p>
-            <ul className="space-y-2">
-              {advice.preparationSteps.map((step) => (
-                <li key={`${step.priority}-${step.title}`}>
-                  <span className="font-semibold">
-                    [{step.priority}] {step.title}:
-                  </span>{" "}
-                  {step.action} {step.reason}
-                </li>
-              ))}
-            </ul>
-          </div>
-
           <p className="border-t border-indigo-100 pt-2 text-[11px] text-gray-600">
             {advice.disclaimer}
           </p>

@@ -3,11 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/server-auth";
-import type {
-  GeminiStructuredAdvice,
-  PreparationPriority,
-  RiskAnalysisResult,
-} from "@/types";
+import type { GeminiStructuredAdvice, RiskAnalysisResult } from "@/types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -20,36 +16,10 @@ const geminiResponseSchema = {
       type: "array",
       items: { type: "string" },
     },
-    preparationSteps: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          priority: {
-            type: "string",
-            enum: ["URGENT", "HIGH", "MEDIUM"],
-          },
-          title: { type: "string" },
-          action: { type: "string" },
-          reason: { type: "string" },
-        },
-        required: ["priority", "title", "action", "reason"],
-      },
-    },
     disclaimer: { type: "string" },
   },
-  required: [
-    "summary",
-    "riskInterpretation",
-    "keyFactors",
-    "preparationSteps",
-    "disclaimer",
-  ],
+  required: ["summary", "riskInterpretation", "keyFactors", "disclaimer"],
 } as const;
-
-function isPreparationPriority(value: unknown): value is PreparationPriority {
-  return value === "URGENT" || value === "HIGH" || value === "MEDIUM";
-}
 
 function isGeminiStructuredAdvice(
   value: unknown,
@@ -57,24 +27,12 @@ function isGeminiStructuredAdvice(
   if (!value || typeof value !== "object") return false;
 
   const advice = value as Record<string, unknown>;
-  const steps = advice.preparationSteps;
 
   if (
     typeof advice.summary !== "string" ||
     typeof advice.riskInterpretation !== "string" ||
     !Array.isArray(advice.keyFactors) ||
     !advice.keyFactors.every((factor) => typeof factor === "string") ||
-    !Array.isArray(steps) ||
-    !steps.every((step) => {
-      if (!step || typeof step !== "object") return false;
-      const item = step as Record<string, unknown>;
-      return (
-        isPreparationPriority(item.priority) &&
-        typeof item.title === "string" &&
-        typeof item.action === "string" &&
-        typeof item.reason === "string"
-      );
-    }) ||
     typeof advice.disclaimer !== "string"
   ) {
     return false;
@@ -148,18 +106,26 @@ export async function POST(request: NextRequest) {
     const response = await ai.models.generateContent({
       model: "gemini-3.1-flash-lite",
       contents: `
-Analisis hasil Machine Learning untuk ${locationName} (${analysis.latitude}, ${analysis.longitude}).
+    Jelaskan hasil analisis risiko gempa untuk ${locationName} kepada orang awam yang tidak memahami istilah Machine Learning atau seismologi. Lokasi analisis: ${analysis.latitude}, ${analysis.longitude}.
 
-HASIL ML (jangan ubah angka ini):
+    HASIL ML (gunakan sebagai fakta dan jangan ubah, hitung ulang, atau menambahkan angka baru):
 ${JSON.stringify(mlResult)}
 
-Buat penjelasan dalam Bahasa Indonesia. Jika skor sekitar 50, jelaskan persiapan tingkat sedang secara konkret.
+    Buat penjelasan dalam Bahasa Indonesia yang rinci tetapi mudah dibaca dan tidak menakut-nakuti. Summary harus terdiri dari 3-4 kalimat yang menjelaskan gambaran besarnya. Risk interpretation harus terdiri dari 2-3 kalimat yang menguraikan arti skor dan kategori bagi pengguna. Key factors harus berisi minimal 5 dan maksimal 6 poin, mencakup skor/kategori serta setiap fitur ML dengan angka asli dan makna praktisnya. Gunakan satuan yang jelas dan hindari jargon tanpa penjelasan.
 `,
       config: {
         systemInstruction: `
-Kamu adalah pakar mitigasi gempa SIGAP AI. Output harus mengikuti JSON schema.
-Skor dan fitur ML adalah fakta yang tidak boleh diubah atau dihitung ulang.
-Tekankan bahwa hasil ini adalah estimasi historis, bukan prediksi waktu gempa.
+    Kamu adalah penerjemah hasil analisis risiko gempa SIGAP AI untuk masyarakat umum, bukan pembuat skor baru. Output harus mengikuti JSON schema.
+
+    Aturan wajib:
+    - Skor kerentanan, kategori, dan seluruh fitur ML adalah fakta. Jangan mengubah, membulatkan secara menyesatkan, menghitung ulang, atau membuat angka/ambang baru.
+    - Jelaskan istilah teknis dengan bahasa sehari-hari. Contoh: magnitudo adalah ukuran kekuatan gempa, kedalaman adalah seberapa jauh pusat gempa dari permukaan, dan jarak adalah perkiraan jarak dari lokasi analisis ke gempa terdekat.
+    - summary harus menjadi ringkasan 3-4 kalimat yang langsung menjawab: "Apa arti hasil ini bagi saya?" Jelaskan tingkat risikonya secara proporsional.
+    - riskInterpretation harus menjelaskan arti skor dan kategori secara proporsional, tanpa menyatakan bahwa gempa pasti terjadi.
+    - keyFactors harus berisi minimal 5 poin penjelasan yang menghubungkan setiap angka ML dengan makna sederhananya. Jangan hanya menyalin nama field atau membuat kesimpulan sebab-akibat yang tidak ada dalam data.
+    - Jangan memberikan langkah persiapan, daftar tindakan, atau rekomendasi mitigasi dalam output ini. Fokus hanya pada penerjemahan dan penjelasan hasil analisis.
+    - Jangan menakut-nakuti, menjanjikan keselamatan, atau menyatakan kapan gempa akan terjadi.
+    - Tekankan bahwa hasil ini adalah estimasi berdasarkan pola historis/statistik, bukan prediksi waktu terjadinya gempa. Pengguna tetap harus mengikuti arahan BMKG, BNPB/BPBD, dan petugas setempat.
 `,
         responseMimeType: "application/json",
         responseJsonSchema: geminiResponseSchema,

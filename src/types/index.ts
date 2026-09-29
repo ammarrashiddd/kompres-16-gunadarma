@@ -50,20 +50,10 @@ export interface SavedRiskAnalysisResponse {
   aiAdvice: GeminiStructuredAdvice | null;
 }
 
-export type PreparationPriority = "URGENT" | "HIGH" | "MEDIUM";
-
-export interface PreparationStep {
-  priority: PreparationPriority;
-  title: string;
-  action: string;
-  reason: string;
-}
-
 export interface GeminiStructuredAdvice {
   summary: string;
   riskInterpretation: string;
   keyFactors: string[];
-  preparationSteps: PreparationStep[];
   disclaimer: string;
 }
 
