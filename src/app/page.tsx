@@ -61,7 +61,7 @@ export default function HomePage() {
               Data yang rumit, jadi langkah yang jelas.
             </h1>
             <p className="mt-7 max-w-lg text-base leading-7 text-[#6f6d69] md:text-lg">
-              SIGAP mengubah informasi gempa menjadi pemahaman yang bisa dipakai
+              GTek mengubah informasi gempa menjadi pemahaman yang bisa dipakai
               siapa saja untuk bersiap, saling membantu, dan bertindak.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
@@ -69,7 +69,7 @@ export default function HomePage() {
                 href={isLoggedIn ? "/dashboard" : "/register"}
                 className="inline-flex items-center gap-2 rounded-full bg-[#202123] px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-[#38393a] active:scale-[0.98]"
               >
-                {isLoggedIn ? "Buka Dashboard" : "Mulai dengan SIGAP"}{" "}
+                {isLoggedIn ? "Buka Dashboard" : "Mulai dengan GTek"}{" "}
                 <ArrowRight size={17} weight="bold" />
               </Link>
             </div>
@@ -245,7 +245,7 @@ export default function HomePage() {
           <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#a15d3c]">
-                Cara kerja SIGAP
+                Cara kerja GTek
               </p>
               <h2 className="mt-4 max-w-md text-4xl font-semibold leading-[1.02] tracking-[-0.07em] md:text-5xl">
                 Data tidak berhenti di angka.
@@ -342,7 +342,7 @@ export default function HomePage() {
               href={isLoggedIn ? "/dashboard" : "/register"}
               className="mt-7 inline-flex items-center gap-2 rounded-full bg-[#202123] px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-[#38393a] active:scale-[0.98]"
             >
-              {isLoggedIn ? "Buka Dashboard" : "Mulai dengan SIGAP"}{" "}
+              {isLoggedIn ? "Buka Dashboard" : "Mulai dengan GTek"}{" "}
               <ArrowRight size={17} weight="bold" />
             </Link>
           </div>
@@ -350,7 +350,7 @@ export default function HomePage() {
 
         <footer className="flex flex-col gap-3 border-t border-[#e5e1dc] py-8 text-xs text-[#777572] md:flex-row md:items-center md:justify-between">
           <span className="font-semibold text-[#202123]">
-            SIGAP / Kesiapsiagaan gempa Indonesia
+            GTek / Kesiapsiagaan gempa Indonesia
           </span>
           <span>
             Estimasi risiko adalah informasi statistik, bukan prediksi gempa.
