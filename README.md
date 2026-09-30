@@ -106,7 +106,7 @@ npx prisma studio
 Contoh minimal:
 
 ```dotenv
-DATABASE_URL="postgresql://user:password@localhost:5432/sigap_ai"
+DATABASE_URL="postgresql://user:password@localhost:5432/GTek"
 AUTH_SECRET="ganti-dengan-secret-acak-yang-panjang"
 JWT_SECRET="ganti-dengan-secret-jwt-yang-berbeda"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
@@ -165,7 +165,7 @@ public/                               Asset publik
 
 | Path                    | Akses       | Fungsi                                                 |
 | ----------------------- | ----------- | ------------------------------------------------------ |
-| `/`                     | Publik      | Landing page dan pengenalan SIGAP AI.                  |
+| `/`                     | Publik      | Landing page dan pengenalan GTek.                      |
 | `/login`                | Belum login | Login email-password atau Google.                      |
 | `/register`             | Belum login | Membuat akun baru.                                     |
 | `/dashboard`            | Login       | Peta dan dashboard gempa.                              |

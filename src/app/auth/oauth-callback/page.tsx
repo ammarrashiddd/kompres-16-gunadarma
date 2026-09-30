@@ -16,6 +16,7 @@ export default function OAuthCallbackPage() {
     }
 
     localStorage.setItem("auth_token", token);
+    document.cookie = `auth_token=${encodeURIComponent(token)}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
     router.replace("/dashboard");
   }, [router]);
 
