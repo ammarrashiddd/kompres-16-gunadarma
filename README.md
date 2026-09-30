@@ -1,8 +1,8 @@
-# SIGAP AI
+# GTek
 
-SIGAP AI adalah platform kesiapsiagaan gempa untuk masyarakat Indonesia. Aplikasi ini menggabungkan peta dan informasi gempa, analisis risiko lokasi, asisten evakuasi, serta laporan komunitas dalam satu aplikasi web.
+GTek adalah platform kesiapsiagaan gempa untuk masyarakat Indonesia. Aplikasi ini menggabungkan peta dan informasi gempa, analisis risiko lokasi, asisten evakuasi, serta laporan komunitas dalam satu aplikasi web.
 
-> **Penting:** SIGAP AI bukan alat prediksi gempa dan tidak menggantikan BMKG, BNPB/BPBD, petugas lapangan, atau sumber informasi resmi lainnya. Saat keadaan darurat, utamakan keselamatan fisik dan ikuti arahan resmi setempat.
+> **Penting:** GTek bukan alat prediksi gempa dan tidak menggantikan BMKG, BNPB/BPBD, petugas lapangan, atau sumber informasi resmi lainnya. Saat keadaan darurat, utamakan keselamatan fisik dan ikuti arahan resmi setempat.
 
 ## Daftar Isi
 
