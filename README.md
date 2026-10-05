@@ -96,40 +96,26 @@ npx prisma studio
 | Variabel               | Wajib                            | Kegunaan                                                                                         |
 | ---------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `DATABASE_URL`         | Ya                               | Connection string PostgreSQL untuk Prisma.                                                       |
-| `AUTH_SECRET`          | Ya untuk NextAuth                | Secret utama NextAuth. Kode juga menerima `NEXTAUTH_SECRET` atau `JWT_SECRET` sebagai fallback.  |
 | `JWT_SECRET`           | Ya untuk JWT custom              | Secret signing token email-password dan OAuth custom jika `AUTH_SECRET` tidak digunakan bersama. |
-| `NEXT_PUBLIC_APP_URL`  | Disarankan                       | URL publik aplikasi untuk membentuk callback OAuth. Contoh lokal: `http://localhost:3000`.       |
 | `GOOGLE_CLIENT_ID`     | Jika Google OAuth digunakan      | Client ID dari Google Cloud OAuth.                                                               |
 | `GOOGLE_CLIENT_SECRET` | Jika Google OAuth digunakan      | Client secret dari Google Cloud OAuth.                                                           |
+| `GITHUB_CLIENT_ID`     | Jika Github OAuth digunakan      | Client ID dari Github developer OAuth.                                                               |
+| `GITHUB_CLIENT_SECRET` | Jika Github OAuth digunakan      | Client secret dari Github developer OAuth.   
 | `GEMINI_API_KEY`       | Jika penjelasan Gemini digunakan | API key Google Gemini.                                                                           |
 
 Contoh minimal:
 
 ```dotenv
 DATABASE_URL="postgresql://user:password@localhost:5432/GTek"
-AUTH_SECRET="ganti-dengan-secret-acak-yang-panjang"
 JWT_SECRET="ganti-dengan-secret-jwt-yang-berbeda"
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
 GOOGLE_CLIENT_ID=""
 GOOGLE_CLIENT_SECRET=""
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=""
 GEMINI_API_KEY=""
 ```
 
 Jangan commit file `.env` atau menaruh secret di client-side. Untuk deployment, masukkan variable melalui dashboard provider hosting.
-
-### Konfigurasi Google OAuth
-
-Tambahkan redirect URI berikut di Google Cloud Console:
-
-```text
-http://localhost:3000/api/auth/callback/google
-```
-
-Untuk production, gunakan domain production:
-
-```text
-https://domain-anda.example/api/auth/callback/google
-```
 
 ## Struktur Aplikasi
 
