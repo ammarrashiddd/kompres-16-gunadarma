@@ -17,13 +17,13 @@ function getPool(): Pool {
 
   if (!connectionString) {
     throw new Error(
-      "DATABASE_URL belum dikonfigurasi. Pastikan file .env.local sudah dibuat."
+      "DATABASE_URL belum dikonfigurasi. Pastikan file .env.local sudah dibuat.",
     );
   }
 
   globalThis._pgPool = new Pool({
     connectionString,
-    max: 10,                   // maksimal 10 koneksi aktif
+    max: 10, // maksimal 10 koneksi aktif
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 2_000,
   });
@@ -37,12 +37,15 @@ function getPool(): Pool {
  */
 export async function query<T = unknown>(
   text: string,
-  params?: unknown[]
+  params?: unknown[],
 ): Promise<T[]> {
   const pool = getPool();
   const client = await pool.connect();
   try {
-    const result = await client.query<T & Record<string, unknown>>(text, params);
+    const result = await client.query<T & Record<string, unknown>>(
+      text,
+      params,
+    );
     return result.rows as T[];
   } finally {
     client.release();

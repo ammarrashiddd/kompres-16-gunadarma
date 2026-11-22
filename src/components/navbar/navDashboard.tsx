@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import UserMenu from "./UserMenu";
 
 export default function NavDashboard() {
@@ -60,4 +60,3 @@ export default function NavDashboard() {
     </div>
   );
 }
-

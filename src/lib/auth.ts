@@ -31,7 +31,7 @@ export async function hashPassword(password: string): Promise<string> {
  */
 export async function verifyPassword(
   password: string,
-  hash: string
+  hash: string,
 ): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
@@ -44,7 +44,7 @@ function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
     throw new Error(
-      "JWT_SECRET belum dikonfigurasi. Pastikan file .env.local sudah dibuat."
+      "JWT_SECRET belum dikonfigurasi. Pastikan file .env.local sudah dibuat.",
     );
   }
   return secret;
@@ -56,7 +56,8 @@ function getJwtSecret(): string {
  */
 export function signToken(payload: Omit<JwtPayload, "iat" | "exp">): string {
   const secret = getJwtSecret();
-  const expiresIn = (process.env.JWT_EXPIRES_IN ?? "7d") as jwt.SignOptions["expiresIn"];
+  const expiresIn = (process.env.JWT_EXPIRES_IN ??
+    "7d") as jwt.SignOptions["expiresIn"];
 
   return jwt.sign(payload, secret, { expiresIn });
 }

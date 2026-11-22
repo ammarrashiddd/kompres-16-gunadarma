@@ -173,7 +173,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-12 grid gap-4 lg:grid-cols-3">
-            <article className="group rounded-[24px] bg-[#202123] p-6 text-white transition-transform hover:-translate-y-1 md:p-8">
+            <article className="group rounded-3xl bg-[#202123] p-6 text-white transition-transform hover:-translate-y-1 md:p-8">
               <div className="flex items-start justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#df8e67] text-[#202123]">
                   <MapTrifold size={25} weight="duotone" />
@@ -182,7 +182,7 @@ export default function HomePage() {
                   01 / Pantau
                 </span>
               </div>
-              <h3 className="mt-16 text-2xl font-semibold tracking-[-0.05em]">
+              <h3 className="mt-16 text-2xl font-semibold tracking-tighter">
                 Dashboard gempa
               </h3>
               <p className="mt-3 text-sm leading-6 text-white/65">
@@ -194,7 +194,7 @@ export default function HomePage() {
               </div>
             </article>
 
-            <article className="rounded-[24px] border border-[#dedbd5] bg-[#ece9e5] p-6 transition-transform hover:-translate-y-1 md:p-8">
+            <article className="rounded-3xl border border-[#dedbd5] bg-[#ece9e5] p-6 transition-transform hover:-translate-y-1 md:p-8">
               <div className="flex items-start justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#dceadf] text-[#3b7045]">
                   <Brain size={25} weight="duotone" />
@@ -203,7 +203,7 @@ export default function HomePage() {
                   02 / Pahami
                 </span>
               </div>
-              <h3 className="mt-16 text-2xl font-semibold tracking-[-0.05em]">
+              <h3 className="mt-16 text-2xl font-semibold tracking-tighter">
                 Analisis machine learning
               </h3>
               <p className="mt-3 text-sm leading-6 text-[#777572]">
@@ -215,7 +215,7 @@ export default function HomePage() {
               </div>
             </article>
 
-            <article className="rounded-[24px] border border-[#dfd6cf] bg-[#f0e5dd] p-6 transition-transform hover:-translate-y-1 md:p-8">
+            <article className="rounded-3xl border border-[#dfd6cf] bg-[#f0e5dd] p-6 transition-transform hover:-translate-y-1 md:p-8">
               <div className="flex items-start justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff7ef] text-[#a15d3c]">
                   <ChatCircleDots size={25} weight="duotone" />
@@ -224,7 +224,7 @@ export default function HomePage() {
                   03 / Bertindak
                 </span>
               </div>
-              <h3 className="mt-16 text-2xl font-semibold tracking-[-0.05em]">
+              <h3 className="mt-16 text-2xl font-semibold tracking-tighter">
                 Community &amp; assistant
               </h3>
               <p className="mt-3 text-sm leading-6 text-[#777572]">

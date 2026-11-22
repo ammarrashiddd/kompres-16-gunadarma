@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useState, type FormEvent } from "react";
 import { ArrowLeft } from "@phosphor-icons/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { type FormEvent, Suspense, useState } from "react";
 
 function AuthContent() {
   const router = useRouter();
@@ -27,7 +27,9 @@ function AuthContent() {
     setIsLoading(true);
     try {
       const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
-      const body = isLogin ? { email, password } : { nama, email, password, confirmPassword: password };
+      const body = isLogin
+        ? { email, password }
+        : { nama, email, password, confirmPassword: password };
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -70,7 +72,11 @@ function AuthContent() {
             onClick={() => router.push("/")}
             className="font-black text-[#202123] hover:opacity-70 hover:cursor-pointer text-base md:text-lg flex flex-row items-center gap-2 mb-8 md:mb-10 transition-all duration-150 group"
           >
-            <ArrowLeft size={24} weight="bold" className="group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft
+              size={24}
+              weight="bold"
+              className="group-hover:-translate-x-1 transition-transform"
+            />
             Back
           </button>
 
@@ -79,21 +85,35 @@ function AuthContent() {
             {isLogin ? "Selamat Datang Kembali" : "Buat Akun Baru"}
           </h1>
           <p className="text-sm text-[#6e6e73] mb-7">
-            {isLogin ? "Masuk ke akun Anda untuk melanjutkan." : "Bergabung dan mulai pengalaman Anda."}
+            {isLogin
+              ? "Masuk ke akun Anda untuk melanjutkan."
+              : "Bergabung dan mulai pengalaman Anda."}
           </p>
 
           {/* Error */}
           {error && (
-            <div className="flex items-center gap-2.5 px-4 py-3 mb-5 rounded-xl text-[13.5px] font-medium text-red-700 bg-[#fce4e4] border border-red-200" role="alert">
+            <div
+              className="flex items-center gap-2.5 px-4 py-3 mb-5 rounded-xl text-[13.5px] font-medium text-red-700 bg-[#fce4e4] border border-red-200"
+              role="alert"
+            >
               {error}
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-4"
+            noValidate
+          >
             {!isLogin && (
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="nama" className="text-xs font-semibold text-[#6e6e73] uppercase tracking-wide">Nama Lengkap</label>
+                <label
+                  htmlFor="nama"
+                  className="text-xs font-semibold text-[#6e6e73] uppercase tracking-wide"
+                >
+                  Nama Lengkap
+                </label>
                 <input
                   id="nama"
                   type="text"
@@ -108,7 +128,12 @@ function AuthContent() {
             )}
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-xs font-semibold text-[#6e6e73] uppercase tracking-wide">Alamat Email</label>
+              <label
+                htmlFor="email"
+                className="text-xs font-semibold text-[#6e6e73] uppercase tracking-wide"
+              >
+                Alamat Email
+              </label>
               <input
                 id="email"
                 type="email"
@@ -122,7 +147,12 @@ function AuthContent() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="password" className="text-xs font-semibold text-[#6e6e73] uppercase tracking-wide">Password</label>
+              <label
+                htmlFor="password"
+                className="text-xs font-semibold text-[#6e6e73] uppercase tracking-wide"
+              >
+                Password
+              </label>
               <input
                 id="password"
                 type="password"
@@ -140,7 +170,11 @@ function AuthContent() {
               disabled={isLoading}
               className="w-full py-3 px-6 bg-[#202123] text-white text-[15px] font-semibold rounded-xl hover:bg-[#38393a] active:scale-[0.98] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Memproses..." : isLogin ? "Masuk" : "Daftar Sekarang"}
+              {isLoading
+                ? "Memproses..."
+                : isLogin
+                  ? "Masuk"
+                  : "Daftar Sekarang"}
             </button>
           </form>
 

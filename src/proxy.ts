@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 // Route yang membutuhkan login
 const PROTECTED_ROUTES = [
@@ -29,7 +29,7 @@ export function proxy(request: NextRequest) {
 
   // Proteksi route private — redirect ke /login jika belum login
   const isProtected = PROTECTED_ROUTES.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
   if (isProtected && !isLoggedIn) {
     const loginUrl = new URL("/login", request.url);

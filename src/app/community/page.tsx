@@ -3,9 +3,9 @@
 import {
   ArrowClockwise,
   Check,
-  MapTrifold,
   MagnifyingGlass,
   MapPin,
+  MapTrifold,
   PencilSimple,
   Plus,
   ShieldWarning,
@@ -25,7 +25,6 @@ import {
 import ConfirmDialog from "@/components/dialog/ConfirmDialog";
 import Toast from "@/components/feedback/Toast";
 import Navbar from "@/components/navbar/Navbar";
-import type { KotaPilihan } from "@/lib/namaDaerah/kotaPilihan";
 import {
   type CommunityPost,
   type CommunityPostInput,
@@ -36,6 +35,7 @@ import {
   updateCommunityPost,
   verifyCommunityPost,
 } from "@/lib/api";
+import type { KotaPilihan } from "@/lib/namaDaerah/kotaPilihan";
 
 const CommunityReportMap = dynamic(
   () => import("@/components/community/CommunityReportMap"),

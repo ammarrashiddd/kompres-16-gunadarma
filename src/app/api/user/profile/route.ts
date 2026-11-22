@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { type NextRequest, NextResponse } from "next/server";
 import { hashPassword, verifyPassword } from "@/lib/auth";
-import { getAuthenticatedUser } from "@/lib/server-auth";
 import { findKotaPilihan } from "@/lib/namaDaerah/kotaPilihan";
+import { prisma } from "@/lib/prisma";
+import { getAuthenticatedUser } from "@/lib/server-auth";
 
 export async function GET(request: NextRequest) {
   const user = await getAuthenticatedUser(request);

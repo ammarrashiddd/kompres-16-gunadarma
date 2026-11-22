@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useRef, type ChangeEvent, type FormEvent } from "react";
 import {
   Camera,
   CheckCircle,
@@ -11,6 +10,7 @@ import {
   WarningCircle,
   X,
 } from "@phosphor-icons/react";
+import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -31,7 +31,7 @@ export default function EditProfileModal({
 }: EditProfileModalProps) {
   const [nama, setNama] = useState(currentName);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    currentAvatar || null
+    currentAvatar || null,
   );
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -131,7 +131,7 @@ export default function EditProfileModal({
             ...existing,
             nama: data.data.nama,
             avatar: data.data.avatar,
-          })
+          }),
         );
       } catch {}
 

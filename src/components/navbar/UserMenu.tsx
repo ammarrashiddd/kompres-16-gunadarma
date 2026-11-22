@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { CaretDown, Gear, SignOut } from "@phosphor-icons/react";
 import Link from "next/link";
-import { CaretDown, SignOut, Gear } from "@phosphor-icons/react";
+import { useEffect, useRef, useState } from "react";
 
 interface UserMenuProps {
   userName: string;

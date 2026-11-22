@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { isValidEmail, signToken, verifyPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { verifyPassword, signToken, isValidEmail } from "@/lib/auth";
 
 interface LoginBody {
   email?: string;
@@ -16,14 +16,14 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { success: false, message: "Email dan password wajib diisi." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!isValidEmail(email)) {
       return NextResponse.json(
         { success: false, message: "Format email tidak valid." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { success: false, message: "Email atau password salah." },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     if (!isPasswordValid) {
       return NextResponse.json(
         { success: false, message: "Email atau password salah." },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -68,13 +68,16 @@ export async function POST(request: NextRequest) {
           created_at: user.createdAt,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("[POST /api/auth/login]", error);
     return NextResponse.json(
-      { success: false, message: "Terjadi kesalahan pada server. Coba lagi nanti." },
-      { status: 500 }
+      {
+        success: false,
+        message: "Terjadi kesalahan pada server. Coba lagi nanti.",
+      },
+      { status: 500 },
     );
   }
 }

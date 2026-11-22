@@ -1,17 +1,6 @@
 "use client";
 
 import {
-  useEffect,
-  useState,
-  useRef,
-  type ChangeEvent,
-  type FormEvent,
-} from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Navbar from "@/components/navbar/Navbar";
-import type { KotaPilihan } from "@/lib/namaDaerah/kotaPilihan";
-import {
   ArrowLeft,
   Camera,
   CheckCircle,
@@ -24,6 +13,17 @@ import {
   User,
   WarningCircle,
 } from "@phosphor-icons/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  type ChangeEvent,
+  type FormEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import Navbar from "@/components/navbar/Navbar";
+import type { KotaPilihan } from "@/lib/namaDaerah/kotaPilihan";
 
 export default function ProfilePage() {
   const router = useRouter();

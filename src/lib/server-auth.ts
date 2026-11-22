@@ -1,7 +1,7 @@
-import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { verifyToken } from "@/lib/auth";
+import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
+import { verifyToken } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function getAuthenticatedUser(request: NextRequest) {
   // 1. Cek sesi NextAuth (Google OAuth)

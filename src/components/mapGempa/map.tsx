@@ -1,18 +1,18 @@
 "use client";
 
+import L from "leaflet";
 import { useEffect, useState } from "react";
 import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
   GeoJSON,
   LayersControl,
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
 } from "react-leaflet";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { renderToString } from "react-dom/server";
 import { MapPinLineIcon } from "@phosphor-icons/react";
+import { renderToString } from "react-dom/server";
 
 const customIcon = L.divIcon({
   className: "custom-phosphor-marker",
@@ -55,7 +55,8 @@ export default function Map() {
 
     async function fetchData() {
       try {
-        const rawBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://earthquake.usgs.gov";
+        const rawBaseUrl =
+          process.env.NEXT_PUBLIC_API_BASE_URL || "https://earthquake.usgs.gov";
         const baseUrl = rawBaseUrl.endsWith("/earthquakes")
           ? rawBaseUrl
           : `${rawBaseUrl}/earthquakes`;

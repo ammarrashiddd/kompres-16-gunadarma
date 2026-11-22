@@ -53,10 +53,10 @@ export default function AuthForm({
       </Link>
 
       {/* Card */}
-      <div className="bg-white rounded-[24px] shadow-[0_16px_48px_rgba(48,43,38,0.10)] px-8 py-10">
+      <div className="bg-white rounded-3xl shadow-[0_16px_48px_rgba(48,43,38,0.10)] px-8 py-10">
         {/* Brand */}
         <div className="flex items-center gap-2.5 mb-8">
-          <div className="w-8 h-8 rounded-[10px] bg-[#202123] flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-[10px] bg-[#202123] flex items-center justify-center shrink-0">
             <svg
               width="18"
               height="18"

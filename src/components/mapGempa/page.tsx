@@ -1,8 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import SideMap from "./sideMap";
-import dynamic from "next/dynamic";
 
 const Map = dynamic(() => import("@/components/mapGempa/map"), {
   ssr: false,
@@ -19,7 +19,8 @@ export default function MapGempa() {
   useEffect(() => {
     async function fetchEarthquakes() {
       try {
-        const rawBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://earthquake.usgs.gov";
+        const rawBaseUrl =
+          process.env.NEXT_PUBLIC_API_BASE_URL || "https://earthquake.usgs.gov";
         const baseUrl = rawBaseUrl.endsWith("/earthquakes")
           ? rawBaseUrl
           : `${rawBaseUrl}/earthquakes`;
