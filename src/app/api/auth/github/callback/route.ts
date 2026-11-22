@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
   createTokenForOAuthUser,
+  getOAuthCredentials,
   getOAuthRedirectUri,
   oauthErrorUrl,
 } from "@/lib/oauth";
@@ -29,8 +30,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const clientId = process.env.GITHUB_CLIENT_ID;
-    const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+    const { clientId, clientSecret } = getOAuthCredentials("github");
     if (!clientId || !clientSecret)
       throw new Error("GitHub OAuth belum dikonfigurasi");
 

@@ -1,8 +1,7 @@
 "use client";
 
-import type { FormEvent, ReactNode } from "react";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import type { FormEvent, ReactNode } from "react";
 
 interface AuthFormProps {
   title: string;
@@ -117,7 +116,6 @@ export default function AuthForm({
         {success && (
           <div
             className="flex items-center gap-2.5 px-4 py-3 mb-5 rounded-xl text-[13.5px] font-medium text-green-700 bg-[#e8f5e9] border border-green-200 animate-[alertIn_0.3s_ease_both]"
-            role="status"
             aria-live="polite"
           >
             <svg
@@ -172,7 +170,9 @@ export default function AuthForm({
           {/* Google OAuth Button */}
           <button
             type="button"
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+            onClick={() => {
+              window.location.href = "/api/auth/google";
+            }}
             className="w-full flex items-center justify-center gap-2 py-3 px-3 bg-white border border-[#e5e5ea] rounded-xl text-[14px] font-semibold text-[#202123] hover:bg-[#f5f5f7] active:scale-[0.98] transition-all duration-150 shadow-sm cursor-pointer"
           >
             {/* Google logo SVG */}

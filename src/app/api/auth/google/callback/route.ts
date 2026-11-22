@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
   createTokenForOAuthUser,
+  getOAuthCredentials,
   getOAuthRedirectUri,
   oauthErrorUrl,
 } from "@/lib/oauth";
@@ -22,8 +23,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const { clientId, clientSecret } = getOAuthCredentials("google");
     if (!clientId || !clientSecret)
       throw new Error("Google OAuth belum dikonfigurasi");
 

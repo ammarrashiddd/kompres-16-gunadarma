@@ -4,6 +4,25 @@ import { prisma } from "@/lib/prisma";
 
 export type OAuthProvider = "google" | "github";
 
+export interface OAuthCredentials {
+  clientId: string | undefined;
+  clientSecret: string | undefined;
+}
+
+export function getOAuthCredentials(provider: OAuthProvider): OAuthCredentials {
+  const suffix = process.env.NODE_ENV === "production" ? "PRODUCTION" : "LOCAL";
+  const providerName = provider.toUpperCase();
+
+  return {
+    clientId:
+      process.env[`${providerName}_CLIENT_ID_${suffix}`] ??
+      process.env[`${providerName}_CLIENT_ID`],
+    clientSecret:
+      process.env[`${providerName}_CLIENT_SECRET_${suffix}`] ??
+      process.env[`${providerName}_CLIENT_SECRET`],
+  };
+}
+
 export function getOAuthRedirectUri(
   provider: OAuthProvider,
   requestUrl: string,

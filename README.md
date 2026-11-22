@@ -97,21 +97,35 @@ npx prisma studio
 | ---------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `DATABASE_URL`         | Ya                               | Connection string PostgreSQL untuk Prisma.                                                       |
 | `JWT_SECRET`           | Ya untuk JWT custom              | Secret signing token email-password dan OAuth custom jika `AUTH_SECRET` tidak digunakan bersama. |
-| `GOOGLE_CLIENT_ID`     | Jika Google OAuth digunakan      | Client ID dari Google Cloud OAuth.                                                               |
-| `GOOGLE_CLIENT_SECRET` | Jika Google OAuth digunakan      | Client secret dari Google Cloud OAuth.                                                           |
-| `GITHUB_CLIENT_ID`     | Jika Github OAuth digunakan      | Client ID dari Github developer OAuth.                                                               |
-| `GITHUB_CLIENT_SECRET` | Jika Github OAuth digunakan      | Client secret dari Github developer OAuth.   
+| `GOOGLE_CLIENT_ID_LOCAL`     | Jika Google OAuth digunakan saat development | Client ID Google untuk environment lokal.                                          |
+| `GOOGLE_CLIENT_SECRET_LOCAL` | Jika Google OAuth digunakan saat development | Client secret Google untuk environment lokal.                                      |
+| `GITHUB_CLIENT_ID_LOCAL`     | Jika GitHub OAuth digunakan saat development | Client ID GitHub untuk environment lokal.                                          |
+| `GITHUB_CLIENT_SECRET_LOCAL` | Jika GitHub OAuth digunakan saat development | Client secret GitHub untuk environment lokal.                                      |
+| `GOOGLE_CLIENT_ID_PRODUCTION`     | Jika Google OAuth digunakan saat production | Client ID Google untuk environment production.                                  |
+| `GOOGLE_CLIENT_SECRET_PRODUCTION` | Jika Google OAuth digunakan saat production | Client secret Google untuk environment production.                              |
+| `GITHUB_CLIENT_ID_PRODUCTION`     | Jika GitHub OAuth digunakan saat production | Client ID GitHub untuk environment production.                                  |
+| `GITHUB_CLIENT_SECRET_PRODUCTION` | Jika GitHub OAuth digunakan saat production | Client secret GitHub untuk environment production.                              |
 | `GEMINI_API_KEY`       | Jika penjelasan Gemini digunakan | API key Google Gemini.                                                                           |
 
 Contoh minimal:
 
 ```dotenv
-DATABASE_URL="postgresql://user:password@localhost:5432/GTek"
-JWT_SECRET="ganti-dengan-secret-jwt-yang-berbeda"
-GOOGLE_CLIENT_ID=""
-GOOGLE_CLIENT_SECRET=""
-GITHUB_CLIENT_ID=""
-GITHUB_CLIENT_SECRET=""
+DATABASE_URL=""
+JWT_SECRET=""
+JWT_EXPIRES_IN="7d"
+
+GOOGLE_CLIENT_ID_LOCAL=""
+GOOGLE_CLIENT_SECRET_LOCAL=""
+
+GITHUB_CLIENT_ID_LOCAL=""
+GITHUB_CLIENT_SECRET_LOCAL=""
+
+GOOGLE_CLIENT_ID_PRODUCTION=""
+GOOGLE_CLIENT_SECRET_PRODUCTION=""
+
+GITHUB_CLIENT_ID_PRODUCTION=""
+GITHUB_CLIENT_SECRET_PRODUCTION=""
+
 GEMINI_API_KEY=""
 ```
 
@@ -403,7 +417,7 @@ Checklist fungsional:
 
 ### Login Google gagal
 
-- Pastikan `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` terisi.
+- Pastikan variabel `*_LOCAL` terisi saat development atau `*_PRODUCTION` saat production.
 - Pastikan redirect URI di Google Cloud Console sama persis dengan URL aplikasi.
 - Pastikan `NEXT_PUBLIC_APP_URL` mengarah ke origin yang benar.
 

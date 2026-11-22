@@ -1,12 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
   createOAuthState,
+  getOAuthCredentials,
   getOAuthRedirectUri,
   oauthErrorUrl,
 } from "@/lib/oauth";
 
 export async function GET(request: NextRequest) {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const { clientId } = getOAuthCredentials("google");
 
   if (!clientId) {
     return NextResponse.redirect(

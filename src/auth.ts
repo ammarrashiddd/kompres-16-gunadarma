@@ -1,8 +1,11 @@
+import crypto from "node:crypto";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth";
-import crypto from "node:crypto";
+import { getOAuthCredentials } from "@/lib/oauth";
+import { prisma } from "@/lib/prisma";
+
+const googleCredentials = getOAuthCredentials("google");
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret:
@@ -11,8 +14,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     process.env.JWT_SECRET,
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: googleCredentials.clientId ?? "",
+      clientSecret: googleCredentials.clientSecret ?? "",
     }),
   ],
   callbacks: {
